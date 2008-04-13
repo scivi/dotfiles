@@ -231,7 +231,18 @@ function saveplace() {
   [ "$1" == "-f" -a $HOME == $PWD ] && chmod -x $SAVED_PLACE
 }
 alias dropplaces='chmod `dirname $SAVED_PLACE`/place_for_*'
-alias showplaces='for f in `dirname $SAVED_PLACE`/place_for_*; do if [ -x $f ]; then echo -n "[*] "; else echo -n "    "; fi; echo -n $(basename $f | tr _ \ )": "; awk "{print \$2;}" $f; done'
+function showplaces() {
+  for f in `dirname $SAVED_PLACE`/place_for_*; do
+    [ ! -s $f ] && continue
+    if [ -x $f ]; then
+      echo -n "[*] "
+    else 
+      echo -n "    "
+    fi
+    echo -n $(basename $f | tr _ \ )": "
+    awk "{print \$2;}" $f
+  done
+}
 
 
 ### Certain Prompt Bookkeeping and Chatterisms
