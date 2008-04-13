@@ -1,0 +1,301 @@
+### Christof Glaser's bashrc
+##
+# TODO: Completion for psql, git, rails script/generate etc
+
+### Certain Usefulness
+##
+# Certain Checking of Interactivity
+alias is_interact='[ -n "$PS1" ]'
+alias is_batch='[ -z "$PS1" ]'
+
+# Certain Renaming
+alias l='ls -lkG'
+alias ll='ls -alkG'
+alias dir='ls -FxkG'
+alias lsdirs='ls -alkG | grep "^d"'
+alias lsd='ls -lkG | grep "^d"'
+alias ls.='ls -alkG | grep " \..*$"'
+alias cd..='cd ..'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias df='df -h'
+alias du='du -k'
+alias pstree='pstree -g2 -w'
+alias vix='/usr/bin/vi'
+alias vi='vim'
+alias x='emacsclient'
+alias less='less -r'
+alias clean='rm -f *~ #*#'
+
+# Certain Darwinism Linuxified
+if [ "$(uname)" == 'Darwin' ]; then
+  alias is_darwin=true
+  alias psf='ps -ax'
+  alias free='vm_stat'
+  alias the_editor=mate
+else
+  alias is_darwin=false
+  alias the_editor=vim
+fi
+export EDITOR=the_editor
+
+# Certain Remote Shelling
+function R() {
+  [ "$1" == "R" ] && local ruser=root@ && shift
+  if [ -z "$1" ]; then
+    echo 'Usage: R [R] [user@]host' >&2
+  else
+    local remote=$*
+    ssh -C $ruser$remote
+  fi
+}
+alias RR='R R'
+
+
+### Certain Shortcuts Hither and Thither.
+##
+# TODO: Make this more dynamic.
+#       Let's have functions to push and pop places and on-arrival actions to or from the list.
+#       So keep a list of places and actions in a file and loop through it.
+#       tag: [place, actions: [action, auto-invoke?]]
+# TODO: Make this more versatile.
+#       Restore more context for a project, e.g. redefine some aliases, e.g. alias psql='psql $database_for_project'
+# TODO: Make this machine agnostic.
+#       Have the map in a separate file named after the hostname.
+function go() {
+  local whither=$1
+  local action=$2
+
+  case "$whither" in
+  200?)
+      cd_and_remember ~/Documents/gl.aser/$whither/
+      ;;
+  web)
+      cd_and_remember ~/Sites/glaser/2007/mockup
+      [ "$action" = '-x' ] && open *.tmproj
+      ;;
+  kamille)  
+      cd_and_remember ~/lib/gl.as-clients/Kamille/address
+      # [ "$action" = '-x' ] &&
+      svn --ignore-externals up && open *.tmproj
+      ;;
+  schaffner)
+      cd_and_remember ~/lib/ruby/$whither
+      [ "$action" = '-x' ] && open ../$whither.tmproj
+      ;;
+  chiro)
+      cd_and_remember ~/lib/gl.as-clients/Praxis
+      [ "$action" = '-x' ] && open *.tmproj
+      ;;
+  *)
+      echo "No idea how to find my way to '$whither'."
+      ;;
+  esac
+}
+
+
+### Certain Environmental Concerns
+##
+#
+TTY=$(basename $(tty))
+is_darwin && TTY=${TTY:3}
+export TTY
+
+# Certain Locals on the Path
+if is_darwin; then
+  for d in /usr/local/pgsql /usr/local /opt/ opt/local; do
+    [ -d $d/bin ] && prepend_path PATH $d/bin
+  done
+else
+  :
+fi
+
+# Certain Paths on Rails
+prepend_path PATH ./script
+export PATH
+
+# Certain Shorthands of Folders
+for d in ~/lib ~/Sites ~/Documents/gl.aser ~/Documents; do
+  [ -d $d ] && append_path CDPATH $d
+done
+export CDPATH
+shopt -s cdable_vars cdspell
+
+# Certain Colour Abundance
+white='\[\033[0m\]'
+blue='\[\033[1;34m\]'
+lightblue='\[\033[0;34m\]'
+red='\[\033[1;31m\]'
+
+
+### Certain Separatisms of History, either per Distinct Places or per Parallel Time
+##
+function local_history() {
+  [ -z "$1" ] && history -w
+  HISTARCHIVE=$HOME/.bash_histories
+  HISTLOG=$HISTARCHIVE/log
+  HISTFILE="$HISTARCHIVE$PWD/bash_history"
+  HISTMODE=local
+  [ "$1" == "init" ] && return
+  history -c
+  history -r  
+}
+function session_history() {
+  HISTFILE=/Users/gcg/.bash_history_${TTY:3}
+  HISTMODE=session
+}
+${HISTMODE:-local}_history init
+
+# Certain Limits of Historical Knowledge, Ignoring Emptyness as well as Duplication
+HISTSIZE=2000
+HISTFILESIZE=10000
+HISTCONTROL=ignoreboth
+
+# Certain Selectivity of Historical Remembrance
+# Matching commands (like those prepended by a space, the final pattern) are immediately forgotten.
+HISTIGNORE="\::&:[bf]g:exit:l[l]:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ \t]*" 
+
+export HISTFILE HISTFILESIZE HISTSIZE HISTCONTROL HISTARCHIVE HISTLOG
+shopt -s histappend
+shopt -s histverify
+
+# Certain History Researchability Providers
+alias History="cat $HISTLOG"
+function hist() {
+  [ -n "$1" ] && lines="-n $1"
+  tail $lines $HISTLOG
+}
+
+# Certain History Schizophrenia Automation
+function diverting_history() {
+  # Save history, then change directory, then load history.
+  # TODO: Merge history of multiple sessions in the same directory.
+  #       Currently last save wins and overwrites other session's history.
+  #       Perhaps know about other sessions and show where they are?
+  cmd="$*"
+  [ -z "$cmd" ] && echo -e "Usage: diverting_history command directory\n\ncommand = cd, pushd, popd\n" && return
+  if [ "$HISTMODE" = "local" ]; then
+    history -w
+    $cmd
+    if [ $OLDPWD != $PWD ]; then
+      local HISTDIR="$HISTARCHIVE$PWD" # use nested folders for history
+      [ -d "$HISTDIR" ] || mkdir -p "$HISTDIR"
+      export HISTFILE="$HISTDIR/bash_history" 
+      history -c
+      history -r
+    else
+      :
+    fi
+  else
+    $cmd
+  fi
+}
+
+function cd_and_remember() {
+  # Emulate cd, but actually use pushd: let's have breadcrumbs in the shell.
+  # And switch history as well.
+  [ "$1" == '--help' -o "$1" == '-h' ] && help pushd
+  if [ -z "$1" ]; then
+    target=~
+  else
+    [ "$1" == "." ] && return
+    target="$*"
+  fi
+  diverting_history pushd "$target"
+}
+
+function popd_and_remember() {
+  [ "$1" == '--help' -o "$1" == '-h' ] && help popd
+  diverting_history popd "$@"
+}
+
+# There and back again.
+alias cd='cd_and_remember'
+alias pd='popd_and_remember'
+alias cd-='popd_and_remember'
+
+
+###  Certain Permanentizing of Sessions
+##
+# For new shells to drop right into place, just call saveplace while still there.
+export SAVE_SESSION=on
+export SAVED_PLACE=$HISTARCHIVE/place_for_$TTY
+
+function saveplace() {
+  [ ! -f $SAVED_PLACE ] && local um=$(umask -p) && umask 0077 && touch $SAVED_PLACE && `$um`
+  [ "$1" == "on" ] && chmod u+x $SAVED_PLACE && return
+  [ "$1" == "off" ] && chmod -x $SAVED_PLACE && return
+  [ $HOME != $PWD ] && echo "cd $PWD" > $SAVED_PLACE && chmod u+x $SAVED_PLACE && return
+  # Going home means to switch it off..
+  [ "$1" == "-f" -a $HOME == $PWD ] && chmod -x $SAVED_PLACE
+}
+alias dropplaces='chmod `dirname $SAVED_PLACE`/place_for_*'
+alias showplaces='for f in `dirname $SAVED_PLACE`/place_for_*; do if [ -x $f ]; then echo -n "[*] "; else echo -n "    "; fi; echo -n $(basename $f | tr _ \ )": "; awk "{print \$2;}" $f; done'
+
+
+### Certain Prompt Bookkeeping and Chatterisms
+##
+# To show TO DO or README files upon changing into a new directory
+function prompt_callback () {
+  EXIT=$?
+  # Bookkeeping: track commands by shell, user, directory with command number and timestamp.
+  printf "%5d %-10s %s %s\n" $$ $USER $PWD "$(HISTTIMEFORMAT='%FT%T ' history 1)" >> $HISTLOG
+
+  # Display useful things when in a new directory. But only once, of course.
+  if [ "$OLDPWD" != "$PWD" ]; then
+    if [ "$PWD" != "$CALLED" ]; then
+      [ "$SAVE_SESSION" == "on" ] && saveplace -f
+      if [ -z "$SILENT" ]; then
+        if [ -r ./TODO ]; then 
+          cat TODO
+        else [ -r ./README ] && cat README
+        fi
+        [ "$SILENT" == "next" ] && unset SILENT
+      fi
+      CALLED=$PWD
+    fi
+  fi
+  return
+}
+export PROMPT_COMMAND=prompt_callback
+
+# Certain Enabling of Golden Silence 
+function silently() {
+  export SILENT="next"
+  "$*"
+}
+[ $SHLVL -gt 1 ] && export SILENT="I'm a shy subshell."
+
+# Certain Barking at Trees
+function prompt_git_branch() {
+  local BRANCH=$(git branch 2>/dev/null)
+  if [ -n "$BRANCH" ]; then 
+    BRANCH=$(echo "$BRANCH" | grep '^*')
+    BRANCH=" (${BRANCH:2})"
+  else
+    BRANCH=''
+  fi
+  echo "$BRANCH"
+}
+
+# Certain Informative Prompting
+if [ "`id -u`" -eq 0 ]; then
+  # Certain Rooty Redness
+  PS1="$red\u@\H:\w$white [$?]\$ "
+else
+  # Certain Blueface Promptness
+  PS1="$lightblue\u@\h$white[\t]$blue\!$white"'$(prompt_git_branch) '"$blue\w $red"'${EXIT/0/}'"$white\$ "
+fi
+export PS1
+
+
+### Certain Direct Directory Hopping
+## a.k.a Session Restoring
+# 
+[ -x $SAVED_PLACE -a "$SAVE_SESSION" == "on" ] && . $SAVED_PLACE >/dev/null
+:
+
+### Certainly Enough Now
+##
+# 2008-04-12 / Version 2.1
