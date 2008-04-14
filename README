@@ -1,0 +1,8 @@
+  DOTFILES
+  by Christof Glaser
+-----------------------------------------------------------------
+
+Currently:
+
+  etc/bashrc  -- An eclectic bash profile. It certainly has bugs.
+                 Current state: Work in progress. See the comments.
