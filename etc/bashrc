@@ -1,6 +1,13 @@
 ### Christof Glaser's bashrc
 ##
-# TODO: Completion for psql, git, rails script/generate etc
+# 2008-04-16 
+#
+# Clone from git://github.com/scivi/dotfiles.git 
+# Look at http://github.com/scivi/dotfiles/tree/master/etc/bashrc
+# Get it from http://github.com/scivi/dotfiles/tree/master%2Fetc%2Fbashrc?raw=true
+
+# TODO: Completion for psql, rails script/generate etc
+#       Copyright, Licence, Credits.
 
 STARTUP="in progress"
 
@@ -10,13 +17,26 @@ STARTUP="in progress"
 alias is_interact='[ -n "$PS1" ]'
 alias is_batch='[ -z "$PS1" ]'
 
-# Certain Renaming
-alias l='ls -lkG'
-alias ll='ls -alkG'
-alias dir='ls -FxkG'
-alias lsdirs='ls -alkG | grep "^d"'
-alias lsd='ls -lkG | grep "^d"'
-alias ls.='ls -alkG | grep " \..*$"'
+# Certain Darwinism Linuxified
+if [ "$(uname)" == 'Darwin' ]; then
+  alias is_darwin=true
+  alias ls='ls -kG'  # KiB, Color
+  alias dir='ls -Fx' # Type marker, across.
+  alias psf='ps -ax'
+  alias free='vm_stat'
+else
+  alias is_darwin=false
+  alias ls='ls --color=auto'
+  # GNU dir is /bin/dir, so no alias.
+  alias psf='ps -fax'
+fi
+
+# Certain Shorthands
+alias l='ls -l'
+alias ll='l -a'
+alias lsdirs='ll | grep "^d"'
+alias lsd='l | grep "^d"'
+alias ls.='ll | grep " \..*$"'
 alias cd..='cd ..'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -30,21 +50,9 @@ alias x='emacsclient'
 alias less='less -r'
 alias clean='rm -f *~ #*#'
 
-# Certain Darwinism Linuxified
-if [ "$(uname)" == 'Darwin' ]; then
-  alias is_darwin=true
-  alias psf='ps -ax'
-  alias free='vm_stat'
-  alias the_editor=mate
-else
-  alias is_darwin=false
-  alias the_editor=vim
-fi
-export EDITOR=the_editor
-
 # Certain Remote Shelling
 function R() {
-  [ "$1" == "R" ] && local ruser=root@ && shift
+  [ "$1" == "R" ] && local ruser=root@ && shift  # You don't do this. Use sudo, like remote="$remote sudo bash --login".
   if [ -z "$1" ]; then
     echo 'Usage: R [R] [user@]host' >&2
   else
@@ -55,48 +63,6 @@ function R() {
 alias RR='R R'
 
 
-### Certain Shortcuts Hither and Thither.
-##
-# TODO: Make this more dynamic.
-#       Let's have functions to push and pop places and on-arrival actions to or from the list.
-#       So keep a list of places and actions in a file and loop through it.
-#       tag: [place, actions: [action, auto-invoke?]]
-# TODO: Make this more versatile.
-#       Restore more context for a project, e.g. redefine some aliases, e.g. alias psql='psql $database_for_project'
-# TODO: Make this machine agnostic.
-#       Have the map in a separate file named after the hostname.
-function go() {
-  local whither=$1
-  local action=$2
-
-  case "$whither" in
-  200?)
-      cd_and_remember ~/Documents/gl.aser/$whither/
-      ;;
-  web)
-      cd_and_remember ~/Sites/glaser/2007/mockup
-      [ "$action" = '-x' ] && open *.tmproj
-      ;;
-  kamille)  
-      cd_and_remember ~/lib/gl.as-clients/Kamille/address
-      # [ "$action" = '-x' ] &&
-      svn --ignore-externals up && open *.tmproj
-      ;;
-  schaffner)
-      cd_and_remember ~/lib/ruby/$whither
-      [ "$action" = '-x' ] && open ../$whither.tmproj
-      ;;
-  chiro)
-      cd_and_remember ~/lib/gl.as-clients/Praxis
-      [ "$action" = '-x' ] && open *.tmproj
-      ;;
-  *)
-      echo "No idea how to find my way to '$whither'."
-      ;;
-  esac
-}
-
-
 ### Certain Environmental Concerns
 ##
 #
@@ -104,13 +70,15 @@ TTY=$(basename $(tty))
 is_darwin && TTY=${TTY:3}
 export TTY
 
+is_darwin && export VISUAL=mate
+export EDITOR=vim
+
 # Certain Locals on the Path
+# TODO: prepend_path is from Fink. Need to copy!
 if is_darwin; then
   for d in /usr/local/pgsql /usr/local /opt/ opt/local; do
     [ -d $d/bin ] && prepend_path PATH $d/bin
   done
-else
-  :
 fi
 
 # Certain Paths on Rails
@@ -118,7 +86,7 @@ prepend_path PATH ./script
 export PATH
 
 # Certain Shorthands of Folders
-for d in ~/lib ~/Sites ~/Documents/gl.aser ~/Documents; do
+for d in ~/lib ~/Sites ~/Documents; do
   [ -d $d ] && append_path CDPATH $d
 done
 export CDPATH
@@ -156,11 +124,10 @@ HISTCONTROL=ignoreboth
 
 # Certain Selectivity of Historical Remembrance
 # Matching commands (like those prepended by a space, the final pattern) are immediately forgotten.
-HISTIGNORE="\::&:[bf]g:exit:l[l]:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ \t]*" 
+HISTIGNORE="\::&:[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ \t]*" 
 
 export HISTFILE HISTFILESIZE HISTSIZE HISTCONTROL HISTARCHIVE HISTLOG
-shopt -s histappend
-shopt -s histverify
+shopt -s histappend histverify histreedit
 
 # Certain History Researchability Providers
 alias History="cat $HISTLOG"
@@ -169,38 +136,55 @@ function hist() {
   tail $lines $HISTLOG
 }
 
+alias whist="cat $HISTLOG"
+
 # Certain History Schizophrenia Automation
 function diverting_history() {
   # Save history, then change directory, then load history.
   # TODO: Merge history of multiple sessions in the same directory.
   #       Currently last save wins and overwrites other session's history.
   #       Perhaps know about other sessions and show where they are?
-  cmd="$*"
+  cmd=$1
   [ -z "$cmd" ] && echo -e "Usage: diverting_history command directory\n\ncommand = cd, pushd, popd\n" && return
+  shift
+  params="$*"
   if [ "$HISTMODE" = "local" ]; then
+    # don't save empty history on startup.
     if [ "$STARTUP" == "in progress" ]; then
       unset STARTUP
     else
       history -w
     fi
-    $cmd
-    if [ $OLDPWD != $PWD ]; then
-      local HISTDIR="$HISTARCHIVE$PWD" # use nested folders for history
+
+    if [ -z "$params" ]; then
+      # Even if $params is empty, passing "" to $cmd might be bad: `pushd ""` == `pushd -0` 
+      $cmd
+    else
+      $cmd "$params"
+    fi
+
+    if [ "$OLDPWD" != "$PWD" ]; then
+      local HISTDIR="$HISTARCHIVE$PWD" # using nested folders for history. 
       [ -d "$HISTDIR" ] || mkdir -p "$HISTDIR"
       export HISTFILE="$HISTDIR/bash_history" 
       history -c
       history -r
     else
-      :
+      return
     fi
   else
-    $cmd
+    # Behave transparently.
+    if [ -z "$params" ]; then
+      $cmd
+    else
+      $cmd "$params"
+    fi
   fi
 }
 
 function cd_and_remember() {
   # Emulate cd, but actually use pushd: let's have breadcrumbs in the shell.
-  # And switch history as well.
+  # And it can switch history as well. 
   [ "$1" == '--help' -o "$1" == '-h' ] && help pushd
   if [ -z "$1" ]; then
     target=~
@@ -225,6 +209,7 @@ alias cd-='popd_and_remember'
 ###  Certain Permanentizing of Sessions
 ##
 # For new shells to drop right into place, just call saveplace while still there.
+# TODO: Should we keep the whole dirstack, not just the last place?
 export SAVE_SESSION=on
 export SAVED_PLACE=$HISTARCHIVE/place_for_$TTY
 
@@ -232,9 +217,10 @@ function saveplace() {
   [ ! -f $SAVED_PLACE ] && local um=$(umask -p) && umask 0077 && touch $SAVED_PLACE && `$um`
   [ "$1" == "on" ] && chmod u+x $SAVED_PLACE && return
   [ "$1" == "off" ] && chmod -x $SAVED_PLACE && return
-  [ $HOME != $PWD ] && echo "cd $PWD" > $SAVED_PLACE && chmod u+x $SAVED_PLACE && return
+  [ "$1" == "go" ] && source $SAVED_PLACE && return 
+  [ $HOME != "$PWD" ] && echo cd \"$PWD\" > $SAVED_PLACE && chmod u+x $SAVED_PLACE && return
   # Going home means to switch it off..
-  [ "$1" == "-f" -a $HOME == $PWD ] && chmod -x $SAVED_PLACE
+  [ "$1" == "-f" -a $HOME == "$PWD" ] && chmod -x $SAVED_PLACE
 }
 alias dropplaces='chmod `dirname $SAVED_PLACE`/place_for_*'
 function showplaces() {
@@ -257,27 +243,29 @@ function showplaces() {
 function prompt_callback () {
   EXIT=$?
   # Bookkeeping: track commands by shell, user, directory with command number and timestamp.
-  printf "%5d %-10s %s %s\n" $$ $USER $PWD "$(HISTTIMEFORMAT='%FT%T ' history 1)" >> $HISTLOG
+  echo $(printf "%5d %-10s %s " $$ $USER "$PWD") "$(HISTTIMEFORMAT='%FT%T ' history 1)" >> $HISTLOG
 
-  # Display useful things when in a new directory. But only once, of course.
+  # Display useful things on arrival in a new place. But only once, of course.
   if [ "$OLDPWD" != "$PWD" ]; then
     if [ "$PWD" != "$CALLED" ]; then
       [ "$SAVE_SESSION" == "on" ] && saveplace -f
       if [ -z "$SILENT" ]; then
         if [ -r ./TODO ]; then 
           cat TODO
-        else [ -r ./README ] && cat README
+        else
+	  [ -r ./README ] && cat README
         fi
+      else
         [ "$SILENT" == "next" ] && unset SILENT
       fi
-      CALLED=$PWD
+      CALLED="$PWD"
     fi
   fi
   return
 }
 export PROMPT_COMMAND=prompt_callback
 
-# Certain Enabling of Golden Silence 
+# Certain Enabling of a Silent Welcome
 function silently() {
   export SILENT="next"
   "$*"
@@ -310,12 +298,10 @@ export PS1
 ### Certain Direct Directory Hopping
 ## a.k.a Session Restoring
 # 
-if [ -x $SAVED_PLACE -a "$SAVE_SESSION" == "on" ];
-  . $SAVED_PLACE >/dev/null
+if [ -x $SAVED_PLACE -a "$SAVE_SESSION" == "on" ]; then
+  source $SAVED_PLACE >/dev/null
 else
   unset STARTUP
 fi
 
 ### Certainly Enough Now
-##
-# 2008-04-14 / Version 2.2
