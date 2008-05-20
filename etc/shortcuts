@@ -1,0 +1,41 @@
+### Certain Shortcuts Hither and Thither.
+##
+# TODO: Make this more dynamic.
+#       Let's have functions to push and pop places and on-arrival actions to or from the list.
+#       So keep a list of places and actions in a file and loop through it.
+#       tag: [place, actions: [action, auto-invoke?]]
+# TODO: Make this more versatile.
+#       Restore more context for a project, e.g. redefine some aliases, e.g. alias psql='psql $database_for_project'
+# TODO: Make this machine agnostic.
+#       Have the map in a separate file named after the hostname.
+function go() {
+  local whither=$1
+  local action=$2
+
+  case "$whither" in
+  200?)
+      cd_and_remember ~/Documents/gl.aser/$whither/
+      ;;
+  web)
+      cd_and_remember ~/Sites/glaser/2007/mockup
+      [ "$action" = '-x' ] && open *.tmproj
+      ;;
+  kamille)
+      cd_and_remember ~/lib/gl.as-clients/Kamille/address
+      # [ "$action" = '-x' ] &&
+      svn --ignore-externals up && open *.tmproj
+      ;;
+  schaffner)
+      cd_and_remember ~/lib/ruby/$whither
+      [ "$action" = '-x' ] && open ../$whither.tmproj
+      ;;
+  chiro)
+      cd_and_remember ~/lib/gl.as-clients/Praxis
+      [ "$action" = '-x' ] && open *.tmproj
+      ;;
+  *)
+      echo "No idea how to find my way to '$whither'."
+      ;;
+  esac
+}
+
