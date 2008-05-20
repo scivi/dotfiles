@@ -1,13 +1,10 @@
 ### Christof Glaser's bashrc
 ##
-# 2008-04-16 
+# 2008-05-20
 #
 # Clone from git://github.com/scivi/dotfiles.git 
 # Look at http://github.com/scivi/dotfiles/tree/master/etc/bashrc
 # Get it from http://github.com/scivi/dotfiles/tree/master%2Fetc%2Fbashrc?raw=true
-
-# TODO: Completion for psql, rails script/generate etc
-#       Copyright, Licence, Credits.
 
 STARTUP="in progress"
 
@@ -50,6 +47,7 @@ alias x='emacsclient'
 alias less='less -r'
 alias clean='rm -f *~ #*#'
 
+
 # Certain Remote Shelling
 function R() {
   [ "$1" == "R" ] && local ruser=root@ && shift  # You don't do this. Use sudo, like remote="$remote sudo bash --login".
@@ -73,8 +71,29 @@ export TTY
 is_darwin && export VISUAL=mate
 export EDITOR=vim
 
+export PAGER=less
+export LESS="-iMSx4 -FX"
+
+
 # Certain Locals on the Path
-# TODO: prepend_path is from Fink. Need to copy!
+# append_path + prepend_path are copied from Fink (http://fink.sf.net) 
+#      Copyright (c) 2001 Christoph Pfisterer / Copyright (c) 2001-2004 The Fink Team
+
+# define append_path and prepend_path to add directory paths, e.g. PATH, MANPATH.
+# add to end of path
+append_path() {
+  if ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ; then
+    eval "$1=\$$1:$2"
+  fi
+}
+
+# add to front of path
+prepend_path() {
+  if ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ; then
+    eval "$1=$2:\$$1"
+  fi
+}
+
 if is_darwin; then
   for d in /usr/local/pgsql /usr/local /opt/ opt/local; do
     [ -d $d/bin ] && prepend_path PATH $d/bin
@@ -102,8 +121,9 @@ red='\[\033[1;31m\]'
 ### Certain Separatisms of History, either per Distinct Places or per Parallel Time
 ##
 function local_history() {
-  [ -z "$1" ] && history -w
   HISTARCHIVE=$HOME/.bash_histories
+  [ -d "$HISTARCHIVE" ] || mkdir $HISTARCHIVE
+  [ -z "$1" ] && history -w
   HISTLOG=$HISTARCHIVE/log
   HISTFILE="$HISTARCHIVE$PWD/bash_history"
   HISTMODE=local
