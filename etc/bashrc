@@ -20,19 +20,17 @@ if [ "$(uname)" == 'Darwin' ]; then
   alias ls='ls -kG'  # KiB, Color
   alias dir='ls -Fx' # Type marker, across.
   alias psf='ps -ax'
-  alias free='vm_stat' # Who knows a better substitute for free(1)?
-  alias pstree='pstree -g2 -w'
+  alias free='vm_stat'
 else
   alias is_darwin=false
   alias ls='ls --color=auto'
   # GNU dir is /bin/dir, so no alias.
   alias psf='ps -fax'
-  alias pstree='pstree -Uul'
 fi
 
 # Certain Shorthands
 alias l='ls -l'
-alias ll='ls -al'
+alias ll='l -a'
 alias lsdirs='ll | grep "^d"'
 alias lsd='l | grep "^d"'
 alias ls.='ll | grep " \..*$"'
@@ -42,9 +40,11 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias df='df -h'
 alias du='du -k'
+alias pstree='pstree -g2 -w'
 alias vix='/usr/bin/vi'
 alias vi='vim'
 alias x='emacsclient'
+alias less='less -r'
 alias clean='rm -f *~ #*#'
 
 
@@ -70,8 +70,9 @@ export TTY
 
 is_darwin && export VISUAL=mate
 export EDITOR=vim
+
 export PAGER=less
-export LESS="-riMSx4 -FX"
+export LESS="-iMSx4 -FX"
 
 
 # Certain Locals on the Path
@@ -143,7 +144,7 @@ HISTCONTROL=ignoreboth
 
 # Certain Selectivity of Historical Remembrance
 # Matching commands (like those prepended by a space, the final pattern) are immediately forgotten.
-HISTIGNORE="\::[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ 	]*" 
+HISTIGNORE="\::&:[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ \t]*" 
 
 export HISTFILE HISTFILESIZE HISTSIZE HISTCONTROL HISTARCHIVE HISTLOG
 shopt -s histappend histverify histreedit
