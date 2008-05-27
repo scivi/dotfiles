@@ -21,11 +21,13 @@ if [ "$(uname)" == 'Darwin' ]; then
   alias dir='ls -Fx' # Type marker, across.
   alias psf='ps -ax'
   alias free='vm_stat' # Who knows a better substitute for free(1)?
+  alias pstree='pstree -g2 -w'
 else
   alias is_darwin=false
   alias ls='ls --color=auto'
   # GNU dir is /bin/dir, so no alias.
   alias psf='ps -fax'
+  alias pstree='pstree -Uul'
 fi
 
 # Certain Shorthands
@@ -40,7 +42,6 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias df='df -h'
 alias du='du -k'
-alias pstree='pstree -g2 -w'
 alias vix='/usr/bin/vi'
 alias vi='vim'
 alias x='emacsclient'
