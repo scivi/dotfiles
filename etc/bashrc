@@ -16,14 +16,15 @@ alias is_batch='[ -z "$PS1" ]'
 
 # Certain Darwinism Linuxified
 if [ "$(uname)" == 'Darwin' ]; then
-  alias is_darwin=true
+  alias is_darwin='true'
   alias ls='ls -kG'  # KiB, Color
   alias dir='ls -Fx' # Type marker, across.
   alias psf='ps -ax'
   alias free='vm_stat' # Who knows a better substitute for free(1)?
   alias pstree='pstree -g2 -w'
+  alias git='LANG=C git'  # workaround for my bad manpath
 else
-  alias is_darwin=false
+  alias is_darwin='false'
   alias ls='ls --color=auto'
   # GNU dir is /bin/dir, so no alias.
   alias psf='ps -fax'
@@ -46,6 +47,7 @@ alias vix='/usr/bin/vi'
 alias vi='vim'
 alias x='emacsclient'
 alias clean='rm -f *~ #*#'
+alias grep='GREP_COLOR="1;37;41" LANG=C grep --color=auto'
 
 
 # Certain Remote Shelling
