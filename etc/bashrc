@@ -316,6 +316,14 @@ fi
 export PS1
 
 
+### Certain Obeying to Environmental Summons
+## a.k.a. Exec'ing immediately
+#
+if [ -n "$EXEC_IMMEDIATELY" ]; then
+  exec $EXEC_IMMEDIATELY
+fi
+
+
 ### Certain Direct Directory Hopping
 ## a.k.a Session Restoring
 # 
