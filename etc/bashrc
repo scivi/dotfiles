@@ -1,6 +1,6 @@
 ### Christof Glaser's bashrc
 ##
-# 2008-05-20
+# 2008-08-25
 #
 # Clone from git://github.com/scivi/dotfiles.git 
 # Look at http://github.com/scivi/dotfiles/tree/master/etc/bashrc
@@ -16,7 +16,7 @@ alias is_batch='[ -z "$PS1" ]'
 
 # Certain Darwinism Linuxified
 if [ "$(uname)" == 'Darwin' ]; then
-  alias is_darwin='true'
+  is_darwin=1
   alias ls='ls -kG'  # KiB, Color
   alias dir='ls -Fx' # Type marker, across.
   alias psf='ps -ax'
@@ -24,7 +24,7 @@ if [ "$(uname)" == 'Darwin' ]; then
   alias pstree='pstree -g2 -w'
   alias git='LANG=C git'  # workaround for my bad manpath
 else
-  alias is_darwin='false'
+  is_darwin=
   alias ls='ls --color=auto'
   # GNU dir is /bin/dir, so no alias.
   alias psf='ps -fax'
@@ -67,14 +67,13 @@ alias RR='R R'
 ##
 #
 TTY=$(basename $(tty))
-is_darwin && TTY=${TTY:3}
+[ -n "$is_darwin" ] && TTY=${TTY:3}
 export TTY
 
-is_darwin && export VISUAL=mate
+[ -n "$is_darwin" ] && export VISUAL=mate
 export EDITOR=vim
 export PAGER=less
 export LESS="-riMSx4 -FX"
-
 
 # Certain Locals on the Path
 # append_path + prepend_path are copied from Fink (http://fink.sf.net) 
@@ -95,7 +94,7 @@ prepend_path() {
   fi
 }
 
-if is_darwin; then
+if [ -n "$is_darwin" ]; then
   for d in /usr/local/pgsql /usr/local /opt/ opt/local; do
     [ -d $d/bin ] && prepend_path PATH $d/bin
   done
@@ -111,6 +110,15 @@ for d in ~/lib ~/Sites ~/Documents; do
 done
 export CDPATH
 shopt -s cdable_vars cdspell
+
+# Certain Manly Colours
+export LESS_TERMCAP_mb=$'\E[01;31m'
+export LESS_TERMCAP_md=$'\E[01;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[01;32m'
 
 # Certain Colour Abundance
 white='\[\033[0m\]'
@@ -133,7 +141,7 @@ function local_history() {
   history -r  
 }
 function session_history() {
-  HISTFILE=/Users/gcg/.bash_history_${TTY:3}
+  HISTFILE=${HOME}.bash_history_${TTY}
   HISTMODE=session
 }
 ${HISTMODE:-local}_history init
