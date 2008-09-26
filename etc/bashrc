@@ -95,7 +95,7 @@ prepend_path() {
 }
 
 if [ -n "$is_darwin" ]; then
-  for d in /usr/local/pgsql /usr/local /opt/ opt/local; do
+  for d in /usr/local/pgsql /usr/local /opt/ /opt/local; do
     [ -d $d/bin ] && prepend_path PATH $d/bin
   done
 fi
