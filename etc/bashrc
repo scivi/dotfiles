@@ -29,6 +29,7 @@ else
   # GNU dir is /bin/dir, so no alias.
   alias psf='ps -fax'
   alias pstree='pstree -Uul'
+  alias mat='open *.tmproj'
 fi
 
 # Certain Shorthands
@@ -70,7 +71,7 @@ TTY=$(basename $(tty))
 [ -n "$is_darwin" ] && TTY=${TTY:3}
 export TTY
 
-[ -n "$is_darwin" ] && export VISUAL=mate
+[ -n "$is_darwin" ] && export VISUAL="mate -w"
 export EDITOR=vim
 export PAGER=less
 export LESS="-riMSx4 -FX"
@@ -112,6 +113,7 @@ export CDPATH
 shopt -s cdable_vars cdspell
 
 # Certain Manly Colours
+# From http://zoetrope.speakermouth.com/2008/8/18/colored-man-pages
 export LESS_TERMCAP_mb=$'\E[01;31m'
 export LESS_TERMCAP_md=$'\E[01;31m'
 export LESS_TERMCAP_me=$'\E[0m'

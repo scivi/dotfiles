@@ -1,0 +1,29 @@
+[user]
+	name = Christof Glaser
+	email = gcg@gl.aser.de
+
+[color]
+	diff = auto
+	branch = auto
+	interactive = always
+	ui = auto
+
+[diff]
+	renames = copy
+	mnemonicprefix = true
+
+[web]
+	browser = firefox
+
+[merge]
+	summary = true
+
+[alias]
+	ci = commit
+	stat = status
+	st = status
+	co = checkout
+	switch = checkout
+
+[pack]
+	threads = 0
