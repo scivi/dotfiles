@@ -22,7 +22,6 @@ if [ "$(uname)" == 'Darwin' ]; then
   alias psf='ps -ax'
   alias free='vm_stat' # Who knows a better substitute for free(1)?
   alias pstree='pstree -g2 -w'
-  alias git='LANG=C git'  # workaround for my bad manpath
 else
   is_darwin=
   alias ls='ls --color=auto'
@@ -100,6 +99,10 @@ if [ -n "$is_darwin" ]; then
     [ -d $d/bin ] && prepend_path PATH $d/bin
   done
 fi
+
+for d in /opt/local/share; do
+  [-d $d/man ] && prepend_path MANPATH $d/man
+done
 
 # Certain Paths on Rails
 prepend_path PATH ./script
