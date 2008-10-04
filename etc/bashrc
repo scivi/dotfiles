@@ -22,13 +22,13 @@ if [ "$(uname)" == 'Darwin' ]; then
   alias psf='ps -ax'
   alias free='vm_stat' # Who knows a better substitute for free(1)?
   alias pstree='pstree -g2 -w'
+  alias mat='open *.tmproj'
 else
   is_darwin=
   alias ls='ls --color=auto'
   # GNU dir is /bin/dir, so no alias.
   alias psf='ps -fax'
   alias pstree='pstree -Uul'
-  alias mat='open *.tmproj'
 fi
 
 # Certain Shorthands
@@ -101,7 +101,7 @@ if [ -n "$is_darwin" ]; then
 fi
 
 for d in /opt/local/share; do
-  [-d $d/man ] && prepend_path MANPATH $d/man
+  [ -d $d/man ] && prepend_path MANPATH $d/man
 done
 
 # Certain Paths on Rails
