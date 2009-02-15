@@ -1,0 +1,5 @@
+# *.[oa]
+*~
+*.tmproj
+attic/
+.DS_Store

@@ -1,0 +1,21 @@
+def sql(query)
+  ActiveRecord::Base.connection.select_all(query)
+end 
+
+def yaml_erb_config(file)
+  YAML.load(ERB.new(IO.read(file)).result)
+end
+
+#User.instance_eval do
+#  def /(name)
+#    find_by_login(name.to_s)
+#  end
+#end
+# 
+#Repository.class_eval do
+#  def /(name)
+#    find_by_name(name.to_s)
+#  end
+#end
+
+
