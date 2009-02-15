@@ -19,11 +19,20 @@ Currently:
 	* Common aliases: shortcuts considered useful.
 	* Common path setup: the usual */bin places 
 	  plus ./script (for Rails and the like).
-	* Git branch display in prompt.
+	* Git branch and status display in prompt.
 	* Can exec a command instead of dropping user to the prompt:
 	  Set EXEC_IMMEDIATELY to command before invoking bash.
 	* Uses colour for ls, grep, less, man, and the prompt.
 	* Certainly abuses 'certainly'. But see the comments.
+
+  etc/gitconfig  -- A basic git default config.
+ 	Needs editing to be useful: just insert your name and email address.
+	* Defines some common aliases.
+	* Enables colour.
+
+  etc/gitignore-global  -- Global ignore settings for git.
+
+  etc/irbrc  -- For Ruby's irb to load a ~/.railsrc when in a Rails project.
 
   etc/psqlrc  -- An eclectic psql (PostgreSQL interactive client) profile.
  	It has neither known bugs nor comments.
@@ -32,10 +41,15 @@ Currently:
 	* Per-Database History.
 	* Always uses PAGER -- works well with less set to exit-if-single-page.
 
-  etc/gitconfig  -- A basic git default config.
- 	Needs editing to be useful: just insert your name and email address.
-	* Defines some common aliases.
-	* Enables colour.
+  etc/railsrc  -- Useful methods for Rails, grabbed from the internets.
+
+  etc/vimrc  -- A basic Vim config, with syntax highlighting.
+
+  xemacs/init.el  -- An eclectic init.el, with keybindings and stuff.
+	Actually works as well for Emacsen without X in their name.
+
+  xemacs/custom.el  -- Emacs preferred colours and such.
+
 
 Installation:
     0. Install git (package git-core in Debian/Ubuntu and BSD ports)
@@ -59,7 +73,8 @@ Deinstallation:
 	# and so on for each file.
 
 Comments, Bug Reports, Enhancements:
-    Use github or write to dotfiles@gl.aser.de.
+        Peruse github at http://github.com/scivi/dotfiles
+        or write to dotfiles@gl.aser.de.
 
 No warranties:
  	The scripts are supplied "as-is". Use on your own risk. Read them first.
@@ -67,3 +82,6 @@ No warranties:
 Licence:
 	GPL v2 or newer. 
 	Some portions are gathered and copied from various places in the net.
+        See the comments.
+        Especially for xemacs/init.el I lost track where it came from.
+
