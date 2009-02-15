@@ -1,6 +1,5 @@
-[user]
-	name = Christof Glaser
-	email = gcg@gl.aser.de
+[core]
+	excludesfile = ~/.gitignore-global
 
 [color]
 	diff = auto
@@ -27,3 +26,7 @@
 
 [pack]
 	threads = 0
+
+[apply]
+	whitespace = nowarn
+

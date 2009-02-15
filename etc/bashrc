@@ -132,6 +132,7 @@ lightblue='\[\033[0;34m\]'
 red='\[\033[1;31m\]'
 lightred='\[\033[0;31m\]'
 yellow='\[\033[1;33m\]'
+lightyellow='\[\033[0;33m\]'
 green='\[\033[1;32m\]'
 
 ### Certain Separatisms of History, either per Distinct Places or per Parallel Time
@@ -352,7 +353,7 @@ function git_status() {
   current_git_status=$(git status | egrep '^# [A-Z]' 2> /dev/null)
   tag=""
   case "$current_git_status" in
-    *Changes\ to\ be\ committed*) tag="$tag$green ➤" ;; 
+    *Changes\ to\ be\ committed*) tag="$tag$lightyellow ⬅" ;; 
   esac
   case "$current_git_status" in
     *Your\ branch\ is\ ahead*)    tag="$tag$green ⬆" ;;
