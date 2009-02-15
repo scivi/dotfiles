@@ -318,13 +318,48 @@ function prompt_git_branch() {
   echo "$BRANCH"
 }
 
+# AUTHOR: Geoffrey Grosenbach http://peepcode.com, from http://pastie.org/325104
+# Extended to give zero or more different symbols as per git status.
+
+# Get the name of the branch we are on
+function git_prompt_info() {
+  # branch_prompt=$(__git_ps1)   ## this we get by port install git +bash_completion
+  branch_prompt=$(prompt_git_branch)
+  if [ -n "$branch_prompt" ]; then
+    status_icon=$(git_status)
+    echo $branch_prompt $status_icon
+  fi
+}
+# Show character if changes are pending
+function git_status() {
+  current_git_status=$(git status | egrep '^# [A-Z]' 2> /dev/null)
+  tag=""
+  case "$current_git_status" in
+    *Changes\ to\ be\ committed*) tag="$tag ➤" ;; 
+  esac
+  case "$current_git_status" in
+    *Changed\ but\ not\ updated*) tag="$tag ♺" ;;
+  esac
+  case "$current_git_status" in
+    *Untracked\ files*)           tag="$tag ★" ;;
+  esac
+  case "$current_git_status" in
+    *Your\ branch\ is\ ahead*)    tag="$tag ⬆" ;;
+  esac
+  #if current_git_status=$(git status | grep 'added to commit' 2> /dev/null); then
+  #  echo "♺"
+  #fi
+  echo "$tag"
+}
+
+
 # Certain Informative Prompting
 if [ "`id -u`" -eq 0 ]; then
   # Certain Rooty Redness
   PS1="$red\u@\H:\w$white [$?]\$ "
 else
   # Certain Blueface Promptness
-  PS1="$lightblue\u@\h$white[\t]$blue\!$white"'$(prompt_git_branch) '"$blue\w $red"'${EXIT/0/}'"$white\$ "
+  PS1="$lightblue\u@\h$white[\t]$blue\!$white"'$(git_prompt_info) '"$blue\w $red"'${EXIT/0/}'"$white\$ "
 fi
 export PS1
 
