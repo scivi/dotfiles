@@ -41,6 +41,8 @@ Currently:
 	* Per-Database History.
 	* Always uses PAGER -- works well with less set to exit-if-single-page.
 
+  etc/toprc -- A colourful config for top.
+
   etc/railsrc  -- Useful methods for Rails, grabbed from the internets.
 
   etc/vimrc  -- A basic Vim config, with syntax highlighting.
