@@ -23,6 +23,7 @@ if [ "$(uname)" == 'Darwin' ]; then
   alias free='vm_stat' # Who knows a better substitute for free(1)?
   alias pstree='pstree -g2 -w'
   alias mat='open *.tmproj'
+  alias hexdump='hexdump -C'
 else
   is_darwin=
   alias ls='ls --color=auto'
@@ -70,7 +71,7 @@ TTY=$(basename $(tty))
 [ -n "$is_darwin" ] && TTY=${TTY:3}
 export TTY
 
-[ -n "$is_darwin" ] && export VISUAL="mate -w"
+[ -n "$is_darwin" ] && export VISUAL="mate_wait"
 export EDITOR=vim
 export PAGER=less
 export LESS="-riMSx4 -FX"
@@ -106,10 +107,11 @@ done
 
 # Certain Paths on Rails
 prepend_path PATH ./script
+prepend_path PATH ./bin
 export PATH
 
 # Certain Shorthands of Folders
-for d in ~/lib ~/Sites ~/Documents; do
+for d in ~/web ~/lib ~/Sites ~/Documents; do
   [ -d $d ] && append_path CDPATH $d
 done
 export CDPATH
@@ -166,6 +168,13 @@ HISTIGNORE="\::[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:pop
 export HISTFILE HISTFILESIZE HISTSIZE HISTCONTROL HISTARCHIVE HISTLOG
 shopt -s histappend histverify histreedit
 
+# Certain Bookkeeping
+# Tracking commands by shell, user, directory with command number and timestamp.
+function push_histlog () {
+  EXIT=$?
+  echo $(printf "%5d %-10s %s " $$ $USER "$PWD") "$(HISTTIMEFORMAT='%FT%T ' history 1)" >> $HISTLOG
+}
+
 # Certain History Researchability Providers
 alias History="cat $HISTLOG"
 function hist() {
@@ -173,7 +182,13 @@ function hist() {
   tail $lines $HISTLOG
 }
 
-alias whist="cat $HISTLOG"
+function whist() {
+  if [ -z "$1" ]; then
+    cat $HISTLOG
+  else
+    grep "$@" $HISTLOG
+  fi
+}
 
 # Certain History Schizophrenia Automation
 function diverting_history() {
@@ -238,30 +253,30 @@ function popd_and_remember() {
 }
 
 # There and back again.
-alias cd='cd_and_remember'
-alias pd='popd_and_remember'
-alias cd-='popd_and_remember'
+alias cd=cd_and_remember
+alias pd=popd_and_remember
+alias cd-=popd_and_remember
 
 
 ###  Certain Permanentizing of Sessions
 ##
 # For new shells to drop right into place, just call saveplace while still there.
 # TODO: Should we keep the whole dirstack, not just the last place?
-export SAVE_SESSION=on
-export SAVED_PLACE=$HISTARCHIVE/place_for_$TTY
+export SESSION_SAVE=on
+export SESSION_PLACE=$HISTARCHIVE/place_for_$TTY
 
 function saveplace() {
-  [ ! -f $SAVED_PLACE ] && local um=$(umask -p) && umask 0077 && touch $SAVED_PLACE && `$um`
-  [ "$1" == "on" ] && chmod u+x $SAVED_PLACE && return
-  [ "$1" == "off" ] && chmod -x $SAVED_PLACE && return
-  [ "$1" == "go" ] && source $SAVED_PLACE && return 
-  [ $HOME != "$PWD" ] && echo cd \"$PWD\" > $SAVED_PLACE && chmod u+x $SAVED_PLACE && return
+  [ ! -f $SESSION_PLACE ] && local um=$(umask -p) && umask 0077 && touch $SESSION_PLACE && `$um`
+  [ "$1" == "on" ] && chmod u+x $SESSION_PLACE && return
+  [ "$1" == "off" ] && chmod -x $SESSION_PLACE && return
+  [ "$1" == "go" ] && source $SESSION_PLACE && return 
+  [ $HOME != "$PWD" ] && echo cd \"$PWD\" > $SESSION_PLACE && chmod u+x $SESSION_PLACE && return
   # Going home means to switch it off..
-  [ "$1" == "-f" -a $HOME == "$PWD" ] && chmod -x $SAVED_PLACE
+  [ "$1" == "-f" -a $HOME == "$PWD" ] && chmod -x $SESSION_PLACE
 }
-alias dropplaces='chmod `dirname $SAVED_PLACE`/place_for_*'
+alias dropplaces='chmod -x `dirname $SESSION_PLACE`/place_for_*'
 function showplaces() {
-  for f in `dirname $SAVED_PLACE`/place_for_*; do
+  for f in `dirname $SESSION_PLACE`/place_for_*; do
     [ ! -s $f ] && continue
     if [ -x $f ]; then
       echo -n "[*] "
@@ -273,15 +288,19 @@ function showplaces() {
   done
 }
 
+function oncd_maybe_saveplace () {
+  [ "$SESSION_SAVE" == "on" ] && saveplace -f
+}
+
 
 # Certain Informative Prompting
 function setprompt() {
-  export PS1="$lightblue\u@\h$white[\t]$blue\!$white${git_prompt_info} $blue\w $red"'${EXIT/0/}'"$white\$ "
+  export PS1="$lightblue\u@\h$white[\t]$blue\!$white${git_prompt_info} $blue\w $red"'${EXIT/0/}'"${yellow}∴$white "
 }
 
 if [ "`id -u`" -eq 0 ]; then
   # Certain Rooty Redness
-  export PS1="$red\u@\H:\w$white [$?]\$ "
+  export PS1="$red\u@\H:\w$white [$?]∴ "
 else
   # Certain Blueface Promptness
   setprompt
@@ -291,41 +310,56 @@ fi
 ##
 # To show TO DO or README files upon changing into a new directory
 function prompt_callback () {
-  EXIT=$?
-  # Bookkeeping: track commands by shell, user, directory with command number and timestamp.
-  echo $(printf "%5d %-10s %s " $$ $USER "$PWD") "$(HISTTIMEFORMAT='%FT%T ' history 1)" >> $HISTLOG
-
-  # Display useful things on arrival in a new place. But only once, of course.
-  if [ "$OLDPWD" != "$PWD" ]; then
-    if [ "$PWD" != "$CALLED" ]; then
-      [ "$SAVE_SESSION" == "on" ] && saveplace -f
-      if [ -z "$SILENT" ]; then
-        if [ -r ./TODO ]; then 
-          cat TODO
-        else
-	  [ -r ./README ] && cat README
-        fi
-      else
-        [ "$SILENT" == "next" ] && unset SILENT
-      fi
-      CALLED="$PWD"
-    fi
-  fi
+  push_histlog
+  invoke_chpwd_functions
   git_prompt_info=$(git_prompt_info)
   setprompt
   true
 }
 export PROMPT_COMMAND=prompt_callback
 
+### Certainly Zee Ess Aitch
+##  
+# To have an array of functions to be run after changing the directory.
+function invoke_chpwd_functions () {
+  if [ "$OLDPWD" != "$PWD" -a  "$chpwd_last_invoked" != "$PWD" ]; then
+    for fun in ${chpwd_functions[*]}; do
+      [ "$fun" = "invoke_chpwd_functions" ] && continue
+      type $fun >/dev/null 2>&1
+      [ $? -eq 0 ] && $fun
+    done
+    chpwd_last_invoked="$PWD"
+    [ "$chpwd_silent" == "next" ] && unset chpwd_silent
+  fi
+}
+function push_chpwd () {
+  chpwd_functions=( "${chpwd_functions[@]}" "$@" )
+}
+export HAS_CHPWD_FUNCTIONS=1
+
+# Display useful things on arrival in a new place. But only once, of course.
+function oncd_todo () {
+  [ -z "$chpwd_silent" -a -r ./TODO ] && cat TODO
+}
+function oncd_maybe_readme () {
+  [ -z "$chpwd_silent" -a ! -r ./TODO -a -r ./README ] && cat README
+}
+
+push_chpwd \
+  oncd_maybe_saveplace \
+  oncd_todo \
+  oncd_maybe_readme \
+  __rvm_project_rvmrc # seems to be necessary for rvm
+
 # Certain Enabling of a Silent Welcome
-function silently() {
-  export SILENT="next"
+function silently () {
+  export chpwd_silent="next"
   "$*"
 }
-[ $SHLVL -gt 1 ] && export SILENT="I'm a shy subshell."
+[ $SHLVL -gt 1 ] && export chpwd_silent="I'm a shy subshell."
 
 # Certain Barking at Trees
-function prompt_git_branch() {
+function prompt_git_branch () {
   local BRANCH=$(git branch 2>/dev/null)
   if [ -n "$BRANCH" ]; then 
     BRANCH=$(echo "$BRANCH" | grep '^*')
@@ -340,7 +374,7 @@ function prompt_git_branch() {
 # Extended to give zero or more different symbols as per git status.
 
 # Get the name of the branch we are on
-function git_prompt_info() {
+function git_prompt_info () {
   # branch_prompt=$(__git_ps1)   ## this we get by port install git +bash_completion
   branch_prompt=$(prompt_git_branch)
   if [ -n "$branch_prompt" ]; then
@@ -349,20 +383,20 @@ function git_prompt_info() {
   fi
 }
 # Show character if changes are pending
-function git_status() {
+function git_status () {
   current_git_status=$(git status | egrep '^# [A-Z]' 2> /dev/null)
   tag=""
   case "$current_git_status" in
-    *Changes\ to\ be\ committed*) tag="$tag$lightyellow ⬅" ;; 
+    *Changes\ to\ be\ committed*) tag="$tag$lightyellow ✔" ;; 
   esac
   case "$current_git_status" in
-    *Your\ branch\ is\ ahead*)    tag="$tag$green ⬆" ;;
+    *Your\ branch\ is\ ahead*)    tag="$tag$green ▲" ;;
   esac
   case "$current_git_status" in
-    *Changed\ but\ not\ updated*) tag="$tag$red ♺" ;;
+    *Changed\ but\ not\ updated*) tag="$tag$red ■" ;;
   esac
   case "$current_git_status" in
-    *Untracked\ files*)           tag="$tag$red ★" ;;
+    *Untracked\ files*)           tag="$tag$red ✚" ;;
   esac
   #if current_git_status=$(git status | grep 'added to commit' 2> /dev/null); then
   #  echo "♺"
@@ -373,17 +407,16 @@ function git_status() {
 
 ### Certain Obeying to Environmental Summons
 ## a.k.a. Exec'ing immediately
-#
+# This is a workaround when the session place might interfere.
 if [ -n "$EXEC_IMMEDIATELY" ]; then
   exec $EXEC_IMMEDIATELY
 fi
 
-
 ### Certain Direct Directory Hopping
 ## a.k.a Session Restoring
 # 
-if [ -x $SAVED_PLACE -a "$SAVE_SESSION" == "on" ]; then
-  source $SAVED_PLACE >/dev/null
+if [ -x $SESSION_PLACE -a "$SESSION_SAVE" == "on" ]; then
+  source $SESSION_PLACE >/dev/null
 else
   unset STARTUP
 fi
