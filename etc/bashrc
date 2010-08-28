@@ -108,6 +108,7 @@ done
 # Certain Paths on Rails
 prepend_path PATH ./script
 prepend_path PATH ./bin
+prepend_path PATH ~/.cabal/bin
 export PATH
 
 # Certain Shorthands of Folders
@@ -298,6 +299,11 @@ function setprompt() {
   export PS1="$lightblue\u@\h$white[\t]$blue\!$white${git_prompt_info} $blue\w $red"'${EXIT/0/}'"${yellow}∴$white "
 }
 
+# Certain Window Betitling
+function setwindowtitle() {
+  echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/$HOME/~}\007"
+}
+
 if [ "`id -u`" -eq 0 ]; then
   # Certain Rooty Redness
   export PS1="$red\u@\H:\w$white [$?]∴ "
@@ -314,6 +320,7 @@ function prompt_callback () {
   invoke_chpwd_functions
   git_prompt_info=$(git_prompt_info)
   setprompt
+  setwindowtitle
   true
 }
 export PROMPT_COMMAND=prompt_callback
