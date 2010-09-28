@@ -49,7 +49,7 @@ alias vi='vim'
 alias x='emacsclient'
 alias clean='rm -f *~ #*#'
 alias grep='GREP_COLOR="1;37;41" LANG=C grep --color=auto'
-
+alias env='env | grep -v LESS_TERMCAP | sort'
 
 # Certain Remote Shelling
 function R() {
@@ -422,7 +422,7 @@ fi
 ### Certain Direct Directory Hopping
 ## a.k.a Session Restoring
 # 
-if [ -x $SESSION_PLACE -a "$SESSION_SAVE" == "on" ]; then
+if [ -x "$SESSION_PLACE" -a "$SESSION_SAVE" == "on" ]; then
   source $SESSION_PLACE >/dev/null
 else
   unset STARTUP
