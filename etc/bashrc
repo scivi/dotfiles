@@ -49,7 +49,14 @@ alias vi='vim'
 alias x='emacsclient'
 alias clean='rm -f *~ #*#'
 alias grep='GREP_COLOR="1;37;41" LANG=C grep --color=auto'
-alias env='env | grep -v LESS_TERMCAP | sort'
+
+function env() {
+  if [ -z "$*" ]; then
+    /usr/bin/env | grep -v LESS_TERMCAP | sort
+  else
+    /usr/bin/env $@
+  fi
+}
 
 # Certain Remote Shelling
 function R() {
