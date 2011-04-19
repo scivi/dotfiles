@@ -2,7 +2,7 @@
 \pset null 'NULL'
 \set PROMPT1 '(%n@%M:%>) %`date +%H:%M:%S` [%/] \n%x%# '
 \set PROMPT2 '' 
-+\set HISTFILE ~/.psql_histories/psql_ :DBNAME
+\set HISTFILE ~/.psql_histories/psql_ :DBNAME
 \timing
 \pset pager always
 \set QUIET 0
