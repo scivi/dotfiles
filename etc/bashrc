@@ -342,7 +342,7 @@ function prompt_callback () {
   push_histlog
   invoke_chpwd_functions
   git_prompt_info=$(git_prompt_info)
-  rvm_prompt_info=$(~/.rvm/bin/rvm-prompt u)
+  rvm_prompt_info=$(rvm-prompt u)
   [ -n "$rvm_prompt_info" ] && rvm_prompt_info=" $purple$rvm_prompt_info$white "
   setprompt
   setwindowtitle
