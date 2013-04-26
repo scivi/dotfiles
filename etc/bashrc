@@ -1,8 +1,8 @@
 ### Christof Glaser's bashrc
 ##
-# 2008-08-25
+# 2013-04-26
 #
-# Clone from git://github.com/scivi/dotfiles.git 
+# Clone from git://github.com/scivi/dotfiles.git
 # Look at http://github.com/scivi/dotfiles/tree/master/etc/bashrc
 # Get it from http://github.com/scivi/dotfiles/tree/master%2Fetc%2Fbashrc?raw=true
 
@@ -22,8 +22,6 @@ if [ "$(uname)" == 'Darwin' ]; then
   alias psf='ps -ax'
   alias free='vm_stat' # Who knows a better substitute for free(1)?
   alias pstree='pstree -g2 -w'
-  alias mat='open *.tmproj'
-  alias hexdump='hexdump -C'
 else
   is_darwin=
   alias ls='ls --color=auto'
@@ -49,7 +47,11 @@ alias vi='vim'
 alias x='emacsclient'
 alias clean='rm -f *~ #*#'
 alias grep='GREP_COLOR="1;37;41" LANG=C grep --color=auto'
+alias bx='bundle exec'
+alias mat='open *.tmproj'
+alias hexdump='hexdump -C'
 
+# Certain Environmental Decoloring
 function env() {
   if [ -z "$*" ]; then
     /usr/bin/env | grep -v LESS_TERMCAP | sort
@@ -71,7 +73,7 @@ function R() {
 alias RR='R R'
 
 
-### Certain Environmental Concerns
+### Certain Variable Assignments
 ##
 #
 TTY=$(basename $(tty))
@@ -84,7 +86,7 @@ export PAGER=less
 export LESS="-riMSx4 -FX"
 
 # Certain Locals on the Path
-# append_path + prepend_path are copied from Fink (http://fink.sf.net) 
+# append_path + prepend_path are copied from Fink (http://fink.sf.net)
 #      Copyright (c) 2001 Christoph Pfisterer / Copyright (c) 2001-2004 The Fink Team
 
 # define append_path and prepend_path to add directory paths, e.g. PATH, MANPATH.
@@ -103,7 +105,7 @@ prepend_path() {
 }
 
 if [ -n "$is_darwin" ]; then
-  for d in /usr/local/pgsql /usr/local /opt/ /opt/local; do
+  for d in /opt/ /opt/local /usr/local; do
     [ -d $d/bin ] && prepend_path PATH $d/bin
   done
 fi
@@ -115,7 +117,6 @@ done
 # Certain Paths on Rails
 prepend_path PATH ./script
 prepend_path PATH ./bin
-prepend_path PATH ~/.cabal/bin
 export PATH
 
 # Certain Shorthands of Folders
@@ -161,7 +162,7 @@ green='\[\033[1;32m\]'
 purple='\[\033[0;35m\]'
 lightpurple='\[\033[1;35m\]'
 
-### Certain Separatisms of History, either per Distinct Places or per Parallel Time
+### Certain Separatisms of History, either per Distinct Places or per Shell Session
 ##
 function local_history() {
   HISTARCHIVE=$HOME/.bash_histories
@@ -172,7 +173,7 @@ function local_history() {
   HISTMODE=local
   [ "$1" == "init" ] && return
   history -c
-  history -r  
+  history -r
 }
 function session_history() {
   HISTFILE=${HOME}.bash_history_${TTY}
@@ -187,7 +188,7 @@ HISTCONTROL=ignoreboth
 
 # Certain Selectivity of Historical Remembrance
 # Matching commands (like those prepended by a space, the final pattern) are immediately forgotten.
-HISTIGNORE="\::[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ 	]*" 
+HISTIGNORE="\::[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ 	]*"
 
 export HISTFILE HISTFILESIZE HISTSIZE HISTCONTROL HISTARCHIVE HISTLOG
 shopt -s histappend histverify histreedit
@@ -200,6 +201,7 @@ function push_histlog () {
 }
 
 # Certain History Researchability Providers
+# Deals with the global history log.
 alias History="cat $HISTLOG"
 function hist() {
   [ -n "$1" ] && lines="-n $1"
@@ -233,16 +235,16 @@ function diverting_history() {
     fi
 
     if [ -z "$params" ]; then
-      # Even if $params is empty, passing "" to $cmd might be bad: `pushd ""` == `pushd -0` 
+      # Even if $params is empty, passing "" to $cmd might be bad: `pushd ""` == `pushd -0`
       $cmd
     else
       $cmd "$params"
     fi
 
     if [ "$OLDPWD" != "$PWD" ]; then
-      local HISTDIR="$HISTARCHIVE$PWD" # using nested folders for history. 
+      local HISTDIR="$HISTARCHIVE$PWD" # using nested folders for history.
       [ -d "$HISTDIR" ] || mkdir -p "$HISTDIR"
-      export HISTFILE="$HISTDIR/bash_history" 
+      export HISTFILE="$HISTDIR/bash_history"
       history -c
       history -r
     else
@@ -260,12 +262,13 @@ function diverting_history() {
 
 function cd_and_remember() {
   # Emulate cd, but actually use pushd: let's have breadcrumbs in the shell.
-  # And it can switch history as well. 
+  # And it can switch history as well.
   [ "$1" == '--help' -o "$1" == '-h' ] && help pushd
   if [ -z "$1" ]; then
     target=~
   else
     [ "$1" == "." ] && return
+    [ "$1" == '-'] && popd_and_remember && return
     target="$*"
   fi
   diverting_history pushd "$target"
@@ -293,7 +296,7 @@ function saveplace() {
   [ ! -f $SESSION_PLACE ] && local um=$(umask -p) && umask 0077 && touch $SESSION_PLACE && `$um`
   [ "$1" == "on" ] && chmod u+x $SESSION_PLACE && return
   [ "$1" == "off" ] && chmod -x $SESSION_PLACE && return
-  [ "$1" == "go" ] && source $SESSION_PLACE && return 
+  [ "$1" == "go" ] && source $SESSION_PLACE && return
   [ $HOME != "$PWD" ] && echo cd \"$PWD\" > $SESSION_PLACE && chmod u+x $SESSION_PLACE && return
   # Going home means to switch it off..
   [ "$1" == "-f" -a $HOME == "$PWD" ] && chmod -x $SESSION_PLACE
@@ -304,7 +307,7 @@ function showplaces() {
     [ ! -s $f ] && continue
     if [ -x $f ]; then
       echo -n "[*] "
-    else 
+    else
       echo -n "    "
     fi
     echo -n $(basename $f | tr _ \ )": "
@@ -351,7 +354,7 @@ function prompt_callback () {
 export PROMPT_COMMAND=prompt_callback
 
 ### Certainly Zee Ess Aitch
-##  
+##
 # To have an array of functions to be run after changing the directory.
 function invoke_chpwd_functions () {
   if [ "$OLDPWD" != "$PWD" -a  "$chpwd_last_invoked" != "$PWD" ]; then
@@ -377,6 +380,7 @@ function oncd_maybe_readme () {
   [ -z "$chpwd_silent" -a ! -r ./TODO -a -r ./README ] && cat README
 }
 
+# Setup hooks to run on directory change
 push_chpwd \
   oncd_maybe_saveplace \
   oncd_todo \
@@ -384,6 +388,7 @@ push_chpwd \
   __rvm_project_rvmrc # seems to be necessary for rvm
 
 # Certain Enabling of a Silent Welcome
+# the previous hooks check for $chpwd_silent and skip printing if set.
 function silently () {
   export chpwd_silent="next"
   "$*"
@@ -393,7 +398,7 @@ function silently () {
 # Certain Barking at Trees
 function prompt_git_branch () {
   local BRANCH=$(git branch 2>/dev/null)
-  if [ -n "$BRANCH" ]; then 
+  if [ -n "$BRANCH" ]; then
     BRANCH=$(echo "$BRANCH" | grep '^*')
     BRANCH="(${BRANCH:2})"
   else
@@ -407,7 +412,6 @@ function prompt_git_branch () {
 
 # Get the name of the branch we are on
 function git_prompt_info () {
-  # branch_prompt=$(__git_ps1)   ## this we get by port install git +bash_completion
   branch_prompt=$(prompt_git_branch)
   if [ -n "$branch_prompt" ]; then
     status_icon=$(git_status)
@@ -419,7 +423,7 @@ function git_status () {
   current_git_status=$(git status | egrep '^# [A-Z]' 2> /dev/null)
   tag=""
   case "$current_git_status" in
-    *Changes\ to\ be\ committed*) tag="$tag$lightyellow ✔" ;; 
+    *Changes\ to\ be\ committed*) tag="$tag$lightyellow ✔" ;;
   esac
   case "$current_git_status" in
     *Your\ branch\ is\ ahead*)    tag="$tag$green ▲" ;;
@@ -446,7 +450,7 @@ fi
 
 ### Certain Direct Directory Hopping
 ## a.k.a Session Restoring
-# 
+#
 if [ -x "$SESSION_PLACE" -a "$SESSION_SAVE" == "on" ]; then
   source $SESSION_PLACE >/dev/null
 else
