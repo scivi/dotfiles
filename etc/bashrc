@@ -268,7 +268,7 @@ function cd_and_remember() {
     target=~
   else
     [ "$1" == "." ] && return
-    [ "$1" == '-'] && popd_and_remember && return
+    [ "$1" == '-' ] && popd_and_remember && return
     target="$*"
   fi
   diverting_history pushd "$target"
