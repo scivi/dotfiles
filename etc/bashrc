@@ -73,6 +73,9 @@ function R() {
 alias RR='R R'
 
 
+# Certain Math Calculations
+function ? () { echo "scale=2;$*" | bc -l; }
+
 ### Certain Variable Assignments
 ##
 #
@@ -80,7 +83,7 @@ TTY=$(basename $(tty))
 [ -n "$is_darwin" ] && TTY=${TTY:3}
 export TTY
 
-[ -n "$is_darwin" ] && export VISUAL="mate_wait"
+[ -n "$is_darwin" ] && export VISUAL="subl_wait"
 export EDITOR=vim
 export PAGER=less
 export LESS="-riMSx4 -FX"
@@ -114,8 +117,8 @@ for d in /opt/local/share; do
   [ -d $d/man ] && prepend_path MANPATH $d/man
 done
 
-# Certain Paths on Rails
-prepend_path PATH ./script
+# Certain Paths for greater Usefulness
+prepend_path PATH ~/bin
 prepend_path PATH ./bin
 export PATH
 
@@ -357,7 +360,7 @@ export PROMPT_COMMAND=prompt_callback
 ##
 # To have an array of functions to be run after changing the directory.
 function invoke_chpwd_functions () {
-  if [ "$OLDPWD" != "$PWD" -a  "$chpwd_last_invoked" != "$PWD" ]; then
+  if [ "$OLDPWD" != "$PWD" -a "$chpwd_last_invoked" != "$PWD" ]; then
     for fun in ${chpwd_functions[*]}; do
       [ "$fun" = "invoke_chpwd_functions" ] && continue
       type $fun >/dev/null 2>&1
