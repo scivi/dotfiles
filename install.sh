@@ -1,8 +1,9 @@
 #!/bin/bash
+
 # Install dotfiles into $HOME.
-INSTALL_DIR=$(dirname $0)
-INSTALL_FILES=$INSTALL_DIR/etc/*
-OPWD=$PWD
+local INSTALL_DIR=$(dirname $0)
+local INSTALL_FILES=$INSTALL_DIR/etc/*
+local OPWD=$PWD
 cd $HOME
 
 echo "Installing $OPWD/$INSTALL_FILES:"
@@ -17,6 +18,26 @@ sublime_library=~/Library/Application\ Support/Sublime\ Text\ 2/Packages/User
 if [ -d "$sublime_library" ]; then
   ln -vs $INSTALL_DIR/Sublime\ Edit\ 2/* "$sublime_library"
   echo "Please edit your Sublime Edit config to use the Flatland theme and My Hallow's Flat color scheme."
+fi
+
+# Link bash config
+echo "Installing Bash config:"
+mkdir -p ~/.config/bash
+cd ~/.config/bash
+ln -svf $OPWD/$INSTALL_DIR/config/bash/feature ~/.config/bash
+ln -svf $OPWD/$INSTALL_DIR/config/bash/private ~/.config/bash
+ln -svf $OPWD/$INSTALL_DIR/config/bash/initialize.sh ~/.config/bash
+ln -svf $OPWD/$INSTALL_DIR/config/bash/load_features.sh ~/.config/bash
+
+# Add to ~/.bashrc
+if grep ' ~/.config/bash/initialize.sh' ~/.bashrc
+  :
+else
+  mv ~/.bashrc ~/.bashrc.old
+  echo -e "source ~/.config/bash/initialize.sh" > ~/.bashrc
+  echo -e "source ~/.config/bash/private/*.sh\n" >> ~/.bashrc
+  cat ~/.bashrc.old >> ~/.bashrc
+  rm ~/.bashrc.old
 fi
 
 if [ -n "$EDITOR" ]; then
