@@ -38,7 +38,9 @@ function R() {
     # Remote Root via sudo
     shift
     local cmnd="sudo bash --login"
-    [ -n "$1" ] && cmnd="$cmnd -c $*"
+    if [ -n "$2" ]; then
+      cmnd="$cmnd -c "
+    fi
   fi
 
   if [ -z "$1" ]; then
@@ -46,8 +48,7 @@ function R() {
   fi
 
   local remote=$1; shift
-  [ -z "$cmnd" ] && local cmnd=$*
-  ssh -tx $remote $cmnd
+  ssh -tx $remote $cmnd $*
 }
 # Remote Root
 alias RR='R R'
