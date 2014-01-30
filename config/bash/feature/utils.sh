@@ -37,15 +37,11 @@ function R() {
   if [ "$1" == "R" ]; then
     # Remote Root via sudo
     shift
-    local cmnd="sudo bash --login"
-    if [ -n "$2" ]; then
-      cmnd="$cmnd -c "
-    fi
+    local cmnd="sudo -i"
+    [ -n "$2" ] && cmnd="$cmnd -c "
   fi
 
-  if [ -z "$1" ]; then
-    echo 'Usage: R [R] [user@]host [cmd]' >&2 && exit 1
-  fi
+  [ -z "$1" ] && echo 'Usage: R [R] [user@]host [cmd]' >&2 && exit 1
 
   local remote=$1; shift
   ssh -tx $remote $cmnd $*
