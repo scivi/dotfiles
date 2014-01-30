@@ -6,10 +6,10 @@ only_interactive
 function setprompt() {
   if [ "`id -u`" -eq 0 ]; then
     # Certain Rooty Redness
-    usercolor=$red
+    local usercolor=$red
   else
     # Certain Blueface Promptness
-    usercolor=$lightblue
+    local usercolor=$lightblue
   fi
   export PS1="$usercolor\u@$blue\h$white[\t]$lightblue\!$white${LOCAL_PROMPT_INFO}$blue\w $red"'${exit_code/0/}'"${yellow}∴$white "
 }

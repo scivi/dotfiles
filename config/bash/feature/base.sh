@@ -2,6 +2,7 @@
 ##
 #
 
+# We can't have have too early, can we?
 alias have='which -s'
 
 # Certain Conditional Output
@@ -13,9 +14,9 @@ function _log () {
 #   maybe_run foo
 #   maybe_run exec foo
 function maybe_run () {
-  fun=$2
+  local fun=$2
   if [ -n "$fun" ]; then
-    invoke_via=$1
+    local invoke_via=$1
   else
     fun=$1
     [ "$fun" = "exec" ] && return
