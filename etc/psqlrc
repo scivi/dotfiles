@@ -1,8 +1,20 @@
 \set QUIET 1
-\pset null 'NULL'
-\set PROMPT1 '(%n@%M:%>) %`date +%H:%M:%S` [%/] \n%x%# '
-\set PROMPT2 '' 
 \set HISTFILE ~/.psql_histories/psql_ :DBNAME
-\timing
-\pset pager always
 \set QUIET 0
+
+
+-- From http://i-dba.blogspot.de/2014/02/colorizing-psql-prompt-guide.html
+--      http://www.craigkerstiens.com/2013/02/21/more-out-of-psql/
+
+-- \set PROMPT1 '(%n@%M:%>) %`date +%H:%M:%S` [%/] \n%x%# '
+\set PROMPT1 '\n%[%033[1;31;40m%] ➤%[%033[33m%]%x %[%033[32m%]%n%[%033[34m%]@%[%033[36m%]%M:%>%[%033[33m%]/%~ %[%033[37m%][%`date +%H:%M:%S`] %[%033[K%]%[%033[0m%]\n\n%[%033[1;33m%]%#%[%033[0m%] '
+\set PROMPT2 '%R ' 
+
+\pset linestyle unicode
+\pset border 2
+\pset format wrapped
+\pset null 'NULL'
+\pset pager always
+
+-- \timing
+
