@@ -15,18 +15,38 @@
 	renames = copy
 	mnemonicprefix = true
 
+[pager]
+  # via https://github.com/nojhan/dotfiles/blob/master/.gitconfig
+  # -R is necessary to display colors in less
+  # the '+' calls a command at start, that will jump to the first diff section
+  # then, you just have to type 'n' to iterate over diff sections
+  diff = less +'/^\\@\\@\\s'
+
 [web]
 	browser = firefox
 
 [merge]
 	summary = true
 
+[push]
+  default = matching
+
 [alias]
-	ci = commit
-	stat = status
-	st = status
-	co = checkout
-	switch = checkout
+  ci = commit
+  stat = status
+  st = status
+  co = checkout
+  br = branch -va
+  puh = push
+  switch = "!sh -c 'git checkout $0 && git submodule update'"
+  graph = "!sh -c 'git log --graph --format=\"%Cgreen%h %Cred%aN%Cblue%d %Creset%s %C(yellow)(%cr)%Creset\" \"$@\"' -"
+  undo = reset --soft HEAD@{1}
+  hardundo = reset --hard HEAD@{1}
+  whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+  whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+  up = fetch --all --prune --tags
+  unstage = reset HEAD
+  undelete = "!sh git checkout $(git rev-list -n 1 HEAD -- \"$1\")^ -- \"$1\""
 
 [pack]
 	threads = 0

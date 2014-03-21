@@ -22,12 +22,12 @@ fi
 
 # Link bash config
 echo "Installing Bash config:"
-mkdir -p ~/.config/bash
-cd ~/.config/bash
+mkdir -p ~/.config/{lib,bash}
 ln -svf $OPWD/$INSTALL_DIR/config/bash/feature ~/.config/bash
 ln -svf $OPWD/$INSTALL_DIR/config/bash/private ~/.config/bash
 ln -svf $OPWD/$INSTALL_DIR/config/bash/initialize.sh ~/.config/bash
 ln -svf $OPWD/$INSTALL_DIR/config/bash/load_features.sh ~/.config/bash
+ln -svf $OPWD/$INSTALL_DIR/config/lib/lessfilter ~/.config/lib
 
 # Add to ~/.bashrc
 if grep ' ~/.config/bash/initialize.sh' ~/.bashrc

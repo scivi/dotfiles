@@ -3,18 +3,20 @@ only_interactive
 ### Certain Variable Assignments
 ##
 #
+# Certain Paths for Greater Usefulness
+prepend_path PATH ~/bin
+prepend_path PATH ./bin
+
 export EDITOR=vim
 if have subl ; then
   export VISUAL="subl_wait"
 else
   export VISUAL=$EDITOR
 fi
+
 export PAGER=less
 export LESS="-riMSx4 -FX"
-
-# Certain Paths for Greater Usefulness
-prepend_path PATH ~/bin
-prepend_path PATH ./bin
+export LESSOPEN='|~/.config/lib/lessfilter %s'
 
 # Certain Manly Colours
 # From http://zoetrope.speakermouth.com/2008/8/18/colored-man-pages

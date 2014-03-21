@@ -7,7 +7,7 @@ alias ls='ls -kG'  # KiB, Color
 alias dir='ls -Fx' # Type marker, across.
 alias pstree='pstree -g2 -w'
 
-for d in /opt/ /opt/local /usr/local; do
+for d in /opt /opt/local /usr/local; do
   [ -d $d/bin ] && prepend_path PATH $d/bin
 done
 
