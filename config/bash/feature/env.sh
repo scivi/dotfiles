@@ -42,3 +42,10 @@ lightpurple='\[\033[1;35m\]'
 
 # Certain Shell Options
 shopt -s cdable_vars cdspell
+
+# Certain Texniques
+[ -z "$TEXINPUTS" ] && TEXINPUTS=.
+export TEXINPUTS=":$HOME/lib/tex:$TEXINPUTS"
+
+# Certainly English
+export LANG=en_US.UTF-8
