@@ -11,7 +11,7 @@ function setprompt() {
     # Certain Blueface Promptness
     local usercolor=$lightblue
   fi
-  export PS1="$usercolor\u@$blue\h$white[\t]$lightblue\!$white${LOCAL_PROMPT_INFO}$blue\w $red"'${exit_code/0/}'"${yellow}∴$white "
+  export PS1="$usercolor\u@$blue\h$white[\D{%d}.\t]$lightblue\!$white${LOCAL_PROMPT_INFO}$blue\w $red"'${exit_code/0/}'"${yellow}∴$white "
 }
 
 # Certain Window Betitling
