@@ -104,12 +104,16 @@ function cd_and_remember() {
   # Emulate cd, but actually use pushd: let's have breadcrumbs in the shell.
   # And it can switch history as well.
   [ "$1" == '--help' -o "$1" == '-h' ] && help pushd
+  local target=''
   if [ -z "$1" ]; then
-    local target=~
+    target=~
   else
     [ "$1" == "." ] && return
-    [ "$1" == '-' ] && popd_and_remember $OLDPWD && return
-    local target="$*"
+    if [ "$1" == '-' ]; then
+      target=$OLDPWD
+    else
+      target="$*"
+    fi
   fi
   diverting_history pushd "$target"
 }
