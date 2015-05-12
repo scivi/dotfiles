@@ -17,6 +17,7 @@ function load_feature () {
 	local feature=$1
 	local file=~/.config/bash/feature/$feature.sh
 
+	# load a feature only once, and only if there is a readable file for it.
 	[[ "${FEATURES[*]}" =~ "$feature" ]] && return
 	[ -r $file ] || return
 
