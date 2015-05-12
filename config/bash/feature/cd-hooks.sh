@@ -20,10 +20,10 @@ function push_chpwd () {
 
 # Display useful things on arrival in a new place.
 function oncd_todo () {
-  [ -z "$chpwd_silent" -a -r TODO ] && cat TODO
+  [ -z "$chpwd_silent" -a -r TODO ] && echo "· $PWD's TODO: »" && cat TODO && echo "«"
 }
 function oncd_maybe_readme () {
-  [ -z "$chpwd_silent" -a ! -r TODO -a -r README ] && cat README
+  [ -z "$chpwd_silent" -a ! -r TODO -a -r README ] && echo "· $PWD's README: »" && cat README && echo "«"
 }
 function oncd_setenv () {
   [ -z "$chpwd_silent" -a -x .direnv ] && source .direnv
