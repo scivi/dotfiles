@@ -3,7 +3,9 @@
 #
 
 # We can't have have too early, can we?
-alias have='which -s'
+function have () {
+  which -s $@
+}
 
 # Certain Conditional Output
 function _log () {
