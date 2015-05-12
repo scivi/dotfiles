@@ -1,32 +1,28 @@
-[user]
-	name = User Name
-	email = test@example.com
-
 [core]
-	excludesfile = ~/.gitignore-global
+  excludesfile = ~/.gitignore-global
 
 [color]
-	diff = auto
-	branch = auto
-	interactive = always
-	ui = auto
+  diff = auto
+  branch = auto
+  interactive = always
+  ui = auto
 
 [diff]
-	renames = copy
-	mnemonicprefix = true
+  renames = copy
+  mnemonicprefix = true
 
 [pager]
   # via https://github.com/nojhan/dotfiles/blob/master/.gitconfig
-  # -R is necessary to display colors in less
+  # the -R is necessary to display colors in less (and to match /^@@/ properly)
   # the '+' calls a command at start, that will jump to the first diff section
   # then, you just have to type 'n' to iterate over diff sections
-  diff = less +'/^\\@\\@\\s'
+  diff = less -R +'/^\\@\\@'
 
 [web]
-	browser = firefox
+  browser = firefox
 
 [merge]
-	summary = true
+  summary = true
 
 [push]
   default = matching
@@ -49,8 +45,8 @@
   undelete = "!sh git checkout $(git rev-list -n 1 HEAD -- \"$1\")^ -- \"$1\""
 
 [pack]
-	threads = 0
+  threads = 0
 
 [apply]
-	whitespace = nowarn
+  whitespace = nowarn
 
