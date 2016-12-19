@@ -364,11 +364,15 @@
 				<key>fontStyle</key>
 				<string></string>
 				<key>foreground</key>
-				<string>#7C7E55</string>
+				<string>#515243</string>
 			</dict>
 		</dict>
 	</array>
 	<key>uuid</key>
 	<string>4824ED46-4F4A-488D-9C8B-82AA7A9B6545</string>
+	<key>author</key>
+	<string>Christof Glaser</string>
+	<key>comment</key>
+	<string>All Hallow&apos;s Eve, adapted to my liking, and to be harmonious with the Flatland theme.</string>
 </dict>
 </plist>
