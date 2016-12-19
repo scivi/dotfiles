@@ -12,6 +12,7 @@
 
 \pset linestyle unicode
 \pset border 2
+\pset columns 0
 \pset format wrapped
 \pset null 'NULL'
 \pset pager always

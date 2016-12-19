@@ -1,5 +1,73 @@
-[core]
-  excludesfile = ~/.gitignore-global
+[alias]
+  br = branch -va
+  # Remove branches that have already been merged with master, a.k.a. ‘brand delete merged’
+  bdm = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
+
+  ci = commit
+  ciam = commit --amend -C HEAD
+  co = checkout
+  # List contributors with number of commits
+  contributors = shortlog --summary --numbered
+
+  d = diff
+  di = diff --cached
+  # Show the diff between the latest commit and the current state
+  dc = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+  # `git dih $number` shows the diff between the state `$number` revisions ago and the current state
+  dih = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+
+  # Find branches/tags containing commit/commit via source/via commit message
+  fb = "!f() { git branch -a --contains $1; }; f"
+  ft = "!f() { git describe --always --contains $1; }; f"
+  fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+  fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+
+  fetchmaster = "!sh -c 'git fetch ${1:-upstream} ${2:-master} && git reset --hard ${1:-upstream}/${2:-master}'"
+
+  graph = "!sh -c 'git log --graph --format=\"%Cgreen%h %Cred%aN%Cblue%d %Creset%s %C(yellow)(%cr)%Creset\" \"$@\"' -"
+
+  ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
+
+  # Merge GitHub pull request on top of the current branch or,
+  # if a branch name is specified, on top of the specified branch
+  #    mpr PR-number [branch]
+  mpr = "!f() { \
+    declare currentBranch=\"$(git symbolic-ref --short HEAD)\"; \
+    declare branch=\"${2:-$currentBranch}\"; \
+    if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
+      git fetch origin refs/pull/$1/head:pr/$1 && \
+      git checkout -B $branch && \
+      git rebase $branch pr/$1 && \
+      git checkout -B $branch && \
+      git merge pr/$1 && \
+      git branch -D pr/$1 && \
+      git commit --amend -m \"$(git log -1 --pretty=%B)\n\nCloses #$1.\"; \
+    fi \
+  }; f"
+
+  remaster = "!sh -c 'git fetch ${1:-upstream} ${2:-master} && git rebase ${1:-upstream}/${2:-master}'"
+  ri = rebase -i --autosquash
+
+  pr = "!sh -c 'f() { git fetch -fu ${2:-origin} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f'"
+  pr-clean = "!sh -c 'git for-each-ref refs/heads/pr/* --format=\"%(refname)\" | while read ref ; do branch=${ref#refs/heads/} ; git branch -D $branch ; done'"
+  puh = push
+  pufff = push -f
+
+  stat = status
+  st = status
+  switch = "!sh -c 'git checkout $0 && git submodule update'"
+
+  undelete = "!sh git checkout $(git rev-list -n 1 HEAD -- \"$1\")^ -- \"$1\""
+  undo = reset --soft HEAD@{1}
+  undohard = reset --hard HEAD@{1}
+  unstage = reset HEAD
+  up = fetch --all --prune --tags
+
+  whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+  whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+
+[apply]
+  whitespace = fix
 
 [color]
   diff = auto
@@ -7,9 +75,43 @@
   interactive = always
   ui = auto
 
+[commit]
+  # https://help.github.com/articles/signing-commits-using-gpg/
+  # gpgsign = true
+
+[core]
+  excludesfile = ~/.gitignore-global
+
+  # Treat spaces before tabs and all kinds of trailing whitespace as an error
+  # [default] trailing-space: looks for spaces at the end of a line
+  # [default] space-before-tab: looks for spaces before tabs at the beginning of a line
+  whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
+  # Make `git rebase` safer on macOS
+  # More info: <http://www.git-tower.com/blog/make-git-rebase-safe-on-osx/>
+  trustctime = false
+
+  # Prevent showing files whose names contain non-ASCII symbols as unversioned.
+  # http://michael-kuehnel.de/git/2014/11/21/git-mac-osx-and-german-umlaute.html
+  precomposeunicode = false
+
 [diff]
   renames = copy
   mnemonicprefix = true
+
+[filter "media"]
+  clean = git-media-clean %f
+  smudge = git-media-smudge %f
+[filter "lfs"]
+  clean = git lfs clean %f
+  smudge = git lfs smudge %f
+  required = true
+
+[merge]
+  summary = true
+
+[pack]
+  threads = 0
 
 [pager]
   # via https://github.com/nojhan/dotfiles/blob/master/.gitconfig
@@ -18,35 +120,8 @@
   # then, you just have to type 'n' to iterate over diff sections
   diff = less -R +'/^\\@\\@'
 
-[web]
-  browser = firefox
-
-[merge]
-  summary = true
-
 [push]
   default = matching
 
-[alias]
-  ci = commit
-  stat = status
-  st = status
-  co = checkout
-  br = branch -va
-  puh = push
-  switch = "!sh -c 'git checkout $0 && git submodule update'"
-  graph = "!sh -c 'git log --graph --format=\"%Cgreen%h %Cred%aN%Cblue%d %Creset%s %C(yellow)(%cr)%Creset\" \"$@\"' -"
-  undo = reset --soft HEAD@{1}
-  hardundo = reset --hard HEAD@{1}
-  whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
-  whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
-  up = fetch --all --prune --tags
-  unstage = reset HEAD
-  undelete = "!sh git checkout $(git rev-list -n 1 HEAD -- \"$1\")^ -- \"$1\""
-
-[pack]
-  threads = 0
-
-[apply]
-  whitespace = nowarn
-
+  # Make `git push` push relevant annotated tags when pushing branches out.
+  followTags = true

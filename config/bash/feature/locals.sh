@@ -6,5 +6,5 @@ only_interactive
 function local_prompt_info () {
   #export LOCAL_PROMPT_INFO="$(git_prompt_info)$(rvm_prompt_info) "
   export LOCAL_PROMPT_INFO="$(git_prompt_info) "
-	export LOCAL_WINDOW_INFO="$USER@$(hostname -s)"
+  export LOCAL_WINDOW_INFO="$USER@$(hostname -s)"
 }

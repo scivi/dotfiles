@@ -2,4 +2,5 @@
 *~
 *.tmproj
 attic/*
+.srclib-cache
 .DS_Store
