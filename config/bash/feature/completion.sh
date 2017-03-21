@@ -1,5 +1,6 @@
-# Certainly complete completions
+only_interactive
 
+# Certainly complete completions
 for dotfile in \
   $(brew --prefix)/etc/bash_completion \
   $(brew --prefix)/share/bash-completion/bash_completion \

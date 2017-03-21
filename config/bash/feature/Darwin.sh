@@ -1,3 +1,5 @@
+only_interactive
+
 # Darwin-only features
 
 alias free='vm_stat'
@@ -6,6 +8,7 @@ alias mat='open *.tmproj'
 alias ls='ls -kG'  # KiB, Color
 alias dir='ls -Fx' # Type marker, across.
 alias pstree='pstree -g2 -w'
+alias lmk="say --voice=Moira \"It took a while mate. But it's done\!\""
 
 for d in /opt /opt/local /usr/local; do
   [ -d $d/bin ] && prepend_path PATH $d/bin
@@ -14,12 +17,6 @@ done
 for d in /opt/local/share; do
   [ -d $d/man ] && prepend_path MANPATH $d/man
 done
-
-# Certain Shorthands of Folders
-for d in ~/web ~/lib ~/Sites ~/Documents; do
-  [ -d $d ] && append_path CDPATH $d
-done
-export CDPATH
 
 # Certain Mac OS X integration
 # From http://hints.macworld.com/article.php?story=20060719155640762
@@ -36,3 +33,10 @@ function ff() {
 
 # Cd to where the current Finder window is.
 function cdf() { pushd "`ff $@`"; }
+
+# Show man page in Preview
+function pman ()
+{
+    man -t "${1}" | open -fa /Applications/Preview.app
+}
+

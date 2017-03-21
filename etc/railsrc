@@ -18,4 +18,8 @@ end
 #  end
 #end
 
-
+class ActiveRecord::Base
+	def self./(query)
+    where(query)
+  end
+end
