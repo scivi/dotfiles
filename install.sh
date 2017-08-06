@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # Install dotfiles into $HOME.
-local INSTALL_DIR=$(dirname $0)
-local INSTALL_FILES=$INSTALL_DIR/etc/*
-local OPWD=$PWD
+INSTALL_DIR=$(dirname $0)
+[ -z "$INSTALL_DIR" -o "$INSTALL_DIR" -eq "/" ] && exit 1
+
+INSTALL_FILES=$INSTALL_DIR/etc/*
+OPWD=$PWD
 cd $HOME
 
 echo "Installing $OPWD/$INSTALL_FILES:"
@@ -30,7 +32,7 @@ ln -svf $OPWD/$INSTALL_DIR/config/bash/load_features.sh ~/.config/bash
 ln -svf $OPWD/$INSTALL_DIR/config/lib/lessfilter ~/.config/lib
 
 # Add to ~/.bashrc
-if grep ' ~/.config/bash/initialize.sh' ~/.bashrc
+if grep ' ~/.config/bash/initialize.sh' ~/.bashrc; then
   :
 else
   mv ~/.bashrc ~/.bashrc.old
