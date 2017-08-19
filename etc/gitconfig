@@ -1,11 +1,16 @@
 [alias]
+  b = branch -v
   br = branch -va
-  # Remove branches that have already been merged with master, a.k.a. ‘brand delete merged’
-  bdm = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
+  # Remove branches that have already been merged with master
+  branch-delete-merged = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
+  bdm = !git branch-delete-merged
 
+  # Nostalgia: Once upon a time, I used Subversion. Before that, CVS. And before that, RCS...
+  checkin = commit
   ci = commit
-  ciam = commit --amend -C HEAD
   co = checkout
+  # /Nostalgia off
+  ciam = commit --amend -C HEAD
   # List contributors with number of commits
   contributors = shortlog --summary --numbered
 
@@ -16,15 +21,13 @@
   # `git dih $number` shows the diff between the state `$number` revisions ago and the current state
   dih = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
 
-  # Find branches/tags containing commit/commit via source/via commit message
-  fb = "!f() { git branch -a --contains $1; }; f"
-  ft = "!f() { git describe --always --contains $1; }; f"
-  fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
-  fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+  fetchmaster = "!f() { git fetch ${1:-upstream} ${2:-master} && git reset --hard ${1:-upstream}/${2:-master}; }; f"
+  fix = commit --fixup
 
-  fetchmaster = "!sh -c 'git fetch ${1:-upstream} ${2:-master} && git reset --hard ${1:-upstream}/${2:-master}'"
-
-  graph = "!sh -c 'git log --graph --format=\"%Cgreen%h %Cred%aN%Cblue%d %Creset%s %C(yellow)(%cr)%Creset\" \"$@\"' -"
+  graph = "!f() { git log --graph --format=\"%Cgreen%h %Cred%aN%Cblue%d %Creset%s %C(yellow)(%cr)%Creset\" \"$@\"; }; f"
+  # Find commits where given text (partially) matches file names, or  commit messages
+  grepfilename = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+  greplog = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
 
   ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
 
@@ -45,13 +48,15 @@
     fi \
   }; f"
 
-  remaster = "!sh -c 'git fetch ${1:-upstream} ${2:-master} && git rebase ${1:-upstream}/${2:-master}'"
+  remaster = "!f() { git fetch ${1:-upstream} ${2:-master} && git rebase ${1:-upstream}/${2:-master}; }; f"
   ri = rebase -i --autosquash
 
-  pr = "!sh -c 'f() { git fetch -fu ${2:-origin} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f'"
+  # Fetch and checkout a (Github) PR branch given by PR number
+  pr = "!f() { git fetch -fu ${2:-origin} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f"
+  # Forget any PR branches
   pr-clean = "!sh -c 'git for-each-ref refs/heads/pr/* --format=\"%(refname)\" | while read ref ; do branch=${ref#refs/heads/} ; git branch -D $branch ; done'"
   puh = push
-  pufff = push -f
+  pufff = push --force-with-lease
 
   stat = status
   st = status
@@ -63,8 +68,14 @@
   unstage = reset HEAD
   up = fetch --all --prune --tags
 
+  # one-line `show`
   whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+  # Find branches/tags containing commit/commit via source/via commit message
+  whichbranch = "!f() { git branch -a --contains $1; }; f"
+  whichtag = "!f() { git describe --always --contains $1; }; f"
+  # Find authors where given text partially matches name or email
   whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+
 
 [apply]
   whitespace = fix
@@ -108,6 +119,14 @@
   smudge = git lfs smudge %f
   required = true
 
+[include]
+  # User-specific sensitive config sections
+  path = .gitconfig-user
+
+[init]
+  # Templates for git hooks and other files for the .git directory.
+  templateDir = ~/.config/git_templates
+
 [merge]
   summary = true
 
@@ -126,6 +145,3 @@
 
   # Make `git push` push relevant annotated tags when pushing branches out.
   followTags = true
-
-[include]
-  path = .gitconfig-user

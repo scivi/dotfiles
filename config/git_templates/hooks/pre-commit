@@ -1,0 +1,99 @@
+#!/usr/bin/env ruby
+
+# Warn about committing certain debugging statements.
+# Inspired by https://gist.github.com/joelbyler/a86734899ff254829552ac104743b8b3
+#
+# You can skip this checking with 'git commit --no-verify'
+exit 0 if ARGV.include?('--no-verify')
+
+# Update this list with your own keywords to warn about.
+KEYWORDS = %w[
+  binding.pry
+  console.log
+  debugger
+  IO.puts
+]
+FILES_CHANGED = %x(git diff --cached --name-only --).split
+
+class KeywordFilter
+  def initialize(keywords, files_changed)
+    @keywords = keywords
+    @files_changed = files_changed
+    @columns = longest_keyword_length
+    @_logged_file = ''
+  end
+
+  # Returns true when any matches found, nil otherwise.
+  def call
+    return if @files_changed.empty? # We care only for staged files.
+    return unless grep?(@keywords, @files_changed)
+
+    puts "\n    WARNING\n    Found debugging statements which you might want to remove before committing:"
+    find_and_log_matches
+    puts "\nUse `git commit --no-verify` to skip this validation."
+
+    true
+  end
+
+  private
+
+  def longest_keyword_length
+    @keywords.inject(0) { |length, word| length > word.size ? length : word.size }
+  end
+
+  def grep?(what, where, options = [])
+    grep(what, where, options << :quiet)
+    $?.exitstatus.zero?
+  end
+
+  def grep(what, where, options = [], pipe: nil)
+    options << :extended_regexp if what.is_a?(Array) # we OR them together
+
+    what = Array(what).join('|')
+    where = Array(where).join(' ')
+    options = Array(options).map { |o| "--#{o.to_s.tr('_', '-')}" }.join(' ')
+
+    cmdline = "git grep --cached #{options} '#{what}' #{where}"
+    cmdline += "| #{pipe}" if pipe
+
+    %x{#{cmdline}}.chomp
+  end
+
+  # TOOD: grep once for all, and massage the output instead.
+  def find_and_log_matches
+    @files_changed.each do |file|
+      @keywords.each do |keyword|
+        log_match(keyword, file) if grep?(keyword, file)
+      end
+    end
+  end
+
+  def log_match(keyword, file)
+    separate_by_newline(file)
+    line_number, line = match(keyword, file)
+    line = '' if line == keyword
+
+    puts "\t#{red(keyword.ljust(@columns))}  in #{yellow(file + ':' + line_number)}  #{line}"
+  end
+
+  def match(keyword, file)
+    grep(keyword, file, :line_number, pipe: "awk -F \: '{print $2 \"ƒƒ\" $3}'").split('ƒƒ')
+  end
+
+  def red(text)
+    "\033[31m#{text}\033[0m"
+  end
+
+  def yellow(text)
+    "\033[33m#{text}\033[0m"
+  end
+
+  def separate_by_newline(file)
+    puts if file != @_logged_file
+    @_logged_file = file
+  end
+end
+
+KeywordFilter
+  .new(KEYWORDS, FILES_CHANGED)
+  .call && exit(1)

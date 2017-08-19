@@ -30,6 +30,8 @@ ln -svf $OPWD/$INSTALL_DIR/config/bash/private ~/.config/bash
 ln -svf $OPWD/$INSTALL_DIR/config/bash/initialize.sh ~/.config/bash
 ln -svf $OPWD/$INSTALL_DIR/config/bash/load_features.sh ~/.config/bash
 ln -svf $OPWD/$INSTALL_DIR/config/lib/lessfilter ~/.config/lib
+ln -svf $OPWD/$INSTALL_DIR/config/git_templates ~/.config/git_templates
+
 
 # Add to ~/.bashrc
 if grep ' ~/.config/bash/initialize.sh' ~/.bashrc; then
@@ -42,9 +44,4 @@ else
   rm ~/.bashrc.old
 fi
 
-if [ -n "$EDITOR" ]; then
-	$EDITOR $HOME/.gitconfig
-else
-	echo 'Please edit $HOME/.gitconfig now and change your name and email.'
-fi
 cd $OPWD
