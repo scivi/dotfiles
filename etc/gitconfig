@@ -1,4 +1,6 @@
 [alias]
+  alias = !"git config --list | awk -F. '/^alias/ { split($2, a, \"=\"); print a[1] \"\\n    \" a[2]; }'"
+
   b = branch -v
   br = branch -va
   # Remove branches that have already been merged with master
@@ -25,9 +27,11 @@
   fix = commit --fixup
 
   graph = "!f() { git log --graph --format=\"%Cgreen%h %Cred%aN%Cblue%d %Creset%s %C(yellow)(%cr)%Creset\" \"$@\"; }; f"
-  # Find commits where given text (partially) matches file names, or  commit messages
+  # Find commits where given text (partially) matches file names, or commit messages
   grepfilename = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
   greplog = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+
+  hasfix = !git greplog fixup!
 
   ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
 
