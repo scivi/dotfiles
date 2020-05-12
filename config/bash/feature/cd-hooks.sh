@@ -27,6 +27,7 @@ function oncd_maybe_readme () {
 }
 function oncd_setenv () {
   [ -z "$chpwd_silent" -a -x .direnv ] && source .direnv
+  [ -r .env ] && source .env
 }
 
 # Certain Enabling of a Silent Welcome

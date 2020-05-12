@@ -4,3 +4,5 @@
 attic/*
 .srclib-cache
 .DS_Store
+*-console.log
+*.ede

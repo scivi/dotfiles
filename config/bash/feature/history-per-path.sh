@@ -7,7 +7,8 @@ function local_history() {
   HISTARCHIVE=$HOME/.bash_histories
   [ -d "$HISTARCHIVE" ] || mkdir $HISTARCHIVE
   [ -z "$1" ] && history -w
-  HISTLOG=$HISTARCHIVE/log
+  HISTLOG=$HISTARCHIVE/archive
+  HISTLOGOLD=$HISTARCHIVE/log
   HISTFILE="$HISTARCHIVE$PWD/bash_history"
   HISTMODE=local
   [ "$1" == "init" ] && return
@@ -28,33 +29,43 @@ HISTCONTROL=ignoreboth
 
 # Certain Selectivity of Historical Remembrance
 # Matching commands (like those prepended by a space, the final pattern) are immediately forgotten.
-HISTIGNORE="\::[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:R:RR:[ 	]*"
+HISTIGNORE="\::[bf]g:exit:w:top:psf:lsd:dir:dirs:[pc]d:cd..:cd-:..:...:pushd:popd:[ 	]*"
 
 export HISTFILE HISTFILESIZE HISTSIZE HISTCONTROL HISTARCHIVE HISTLOG
 shopt -s histappend histverify histreedit
 
 
 # Certain Bookkeeping
-# Track commands by shell, user, directory with command number and timestamp,
-# in a global history log file.
+# Track shell's pid, user, directory, command number, and timestamp for each command line
+# in a global history log file. This has certainly proved immensely useful.
 function push_histlog () {
-  EXIT=$?
-  echo $(printf "%5d %-10s %s " $$ $USER "$PWD") "$(HISTTIMEFORMAT='%FT%T ' history 1)" >> $HISTLOG
+  if [ $exit_code -eq 0 ]; then mark=":"; else mark="÷"; fi
+  last_cmd=$(history 1)
+  num=$(awk '{ print $1; }' <<<$last_cmd)
+  cmd=$(awk '{ $1=""; print; }' <<<$last_cmd)
+
+  echo $(date +%FT%T) "$num" "$USER" "$$" "$PWD" "$mark" "$cmd" >> $HISTLOG
 }
 
 # Certain History Researchability Providers
-# Deals with the global history log.
-alias History="cat $HISTLOG"
+# Show last commands from the global history archive.
 function hist() {
   [ -n "$1" ] && lines="-n $1"
   tail $lines $HISTLOG
 }
 
+# What's the history?
+# This searches the archive, having user name, directory, timestamp ...
 function whist() {
   if [ -z "$1" ]; then
     cat $HISTLOG
   else
-    grep "$@" $HISTLOG
+    if which -s ag; then
+      grep="ag --nonumbers"
+    else
+      grep=grep
+    fi
+    $grep "$@" $HISTLOGOLD $HISTLOG
   fi
 }
 
