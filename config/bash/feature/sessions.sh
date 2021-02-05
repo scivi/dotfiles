@@ -12,7 +12,7 @@ export SESSION_PLACE=$SESSION_STORE/place_for_$TTY
 function saveplace() {
   [ ! -f $SESSION_PLACE ] && local um=$(umask -p) && umask 0077 && touch $SESSION_PLACE && `$um`
   [ "$1" == "on" ]    && chmod u+x $SESSION_PLACE && return
-  [ "$1" == "off" ]   && chmod -x $SESSION_PLACE && return
+  [ "$1" == "off" ]   && echo > $SESSION_PLACE && chmod -x $SESSION_PLACE && return
   [ "$1" == "go" ]    && source $SESSION_PLACE && return
   [ $HOME != "$PWD" ] && echo cd \"$PWD\" > $SESSION_PLACE && chmod u+x $SESSION_PLACE && return
   # Going home means to switch it off..
@@ -43,12 +43,18 @@ push_chpwd oncd_maybe_saveplace
 function jump_to_savedplace () {
   # Make sure our storage directory is there.
   [ -d $SESSION_STORE ] || mkdir -p $SESSION_STORE
-	# This is a workaround when the session place might interfere.
+  # This is a workaround when the session place might interfere.
+  echo -n "** $EXEC_IMMEDIATELY"
   maybe_run exec $EXEC_IMMEDIATELY
-	# Now go to stored directory, if any.
-	if [ -x "$SESSION_PLACE" -a "$SESSION_SAVE" == "on" ]; then
+  # Now go to stored directory, if any.
+  if [ -x "$SESSION_PLACE" -a "$SESSION_SAVE" == "on" ]; then
     source $SESSION_PLACE >/dev/null && maybe_run invoke_chpwd_functions
     _log "Welcome back!"
+  else
+    # iTerm2 would end up in / instead of ~, so... let's make sure we go home.
+    cd >/dev/null
+    popd -n -1 >/dev/null
+    _log "Welcome home!"
   fi
 }
 after_startup_do jump_to_savedplace

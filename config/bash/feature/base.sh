@@ -9,7 +9,7 @@ function have () {
 
 # Certain Conditional Output
 function _log () {
-  [ -n "${_LOGLEVEL}" ] && echo "$@"
+  [ -n "${_LOGLEVEL}" -a -n "$PS1" ] && echo "$@"
 }
 
 # Certain Dynamic Invocations

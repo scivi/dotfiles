@@ -1,4 +1,5 @@
-only_interactive
+#only_interactive
+[ -n "$PS1" ] || return
 
 ### Certain Variable Assignments
 ##

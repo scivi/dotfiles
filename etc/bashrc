@@ -1,3 +1,2 @@
 source ~/.config/bash/initialize.sh
-source ~/.config/bash/private/scivi-mac.sh
-
+#source ~/.config/bash/private/scivi-mac.sh

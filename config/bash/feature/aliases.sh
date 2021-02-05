@@ -100,4 +100,6 @@ if have subl ; then
   }
 fi
 
-is_interactive || shopt -s expand_aliases
+#is_interactive || shopt -s expand_aliases
+[ -n "$PS1" ] || shopt -s expand_aliases
+
