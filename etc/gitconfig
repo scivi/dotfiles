@@ -37,12 +37,13 @@
 
   # Merge GitHub pull request on top of the current branch or,
   # if a branch name is specified, on top of the specified branch
-  #    mpr PR-number [branch]
+  #    mpr PR-number [branch] [github-remote=origin]
   mpr = "!f() { \
     declare currentBranch=\"$(git symbolic-ref --short HEAD)\"; \
     declare branch=\"${2:-$currentBranch}\"; \
+    declare github=\"#{3:-origin}\"; \
     if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-      git fetch origin refs/pull/$1/head:pr/$1 && \
+      git fetch $github refs/pull/$1/head:pr/$1 && \
       git checkout -B $branch && \
       git rebase $branch pr/$1 && \
       git checkout -B $branch && \
@@ -110,6 +111,9 @@
   # http://michael-kuehnel.de/git/2014/11/21/git-mac-osx-and-german-umlaute.html
   precomposeunicode = false
 
+  #pager = delta --dark --plus-color="#012800" --minus-color="#340001" --theme="base16-ocean.dark"
+  pager = delta --dark --plus-color="#012800" --minus-color="#340001"
+
 [diff]
   renames = copy
   mnemonicprefix = true
@@ -119,8 +123,9 @@
   smudge = git-media-smudge %f
 
 [filter "lfs"]
-  clean = git lfs clean %f
-  smudge = git lfs smudge %f
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
   required = true
 
 [include]
@@ -129,7 +134,7 @@
 
 [init]
   # Templates for git hooks and other files for the .git directory.
-  templateDir = ~/.config/git_templates
+  #templateDir = ~/.config/git_templates
 
 [merge]
   summary = true
@@ -142,7 +147,7 @@
   # the -R is necessary to display colors in less (and to match /^@@/ properly)
   # the '+' calls a command at start, that will jump to the first diff section
   # then, you just have to type 'n' to iterate over diff sections
-  diff = less -R +'/^\\@\\@'
+  #diff = less -R +'/^\\@\\@'
 
 [push]
   default = matching
